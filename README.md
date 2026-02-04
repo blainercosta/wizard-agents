@@ -1,36 +1,89 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Wizard Agents
 
-## Getting Started
+Open source collection of plug-and-play system prompts for Claude Code and Claude Projects.
 
-First, run the development server:
+## What's Inside
+
+Curated, battle-tested prompts for specialized AI agents:
+
+| Category | Agents |
+|----------|--------|
+| **Development** | Dev Specialist, Performance, Security, TypeScript Expert |
+| **Design** | UI, UX, Product Design, UX Strategy |
+| **Business** | PM Specialist, AI Strategy |
+| **Marketing** | SEO Specialist |
+| **Automation** | CI/CD Specialist |
+
+## Quick Start
+
+1. Browse agents at the website or in `/agents` directory
+2. Copy the prompt content
+3. Paste into Claude Code (`CLAUDE.md`) or Claude Projects
 
 ```bash
+# Run locally
+git clone https://github.com/blainercosta/wizard-agents.git
+cd wizard-agents
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Using the Agents
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Claude Code
+Add to your project's `CLAUDE.md` file:
+```markdown
+# CLAUDE.md
 
-## Learn More
+[Paste agent content here]
+```
 
-To learn more about Next.js, take a look at the following resources:
+### Claude Projects
+1. Open Claude Projects
+2. Go to Project Instructions
+3. Paste the agent content
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Agent Structure
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Each agent follows a consistent format:
 
-## Deploy on Vercel
+```yaml
+---
+name: "Agent Name"
+slug: "agent-slug"
+category: "development"
+version: "1.0"
+compatibility: ["claude-code", "claude-projects"]
+description: "What this agent does"
+tags: ["tag1", "tag2"]
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+# Agent Content
+[System prompt content]
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Adding New Agents
+
+1. Create file in `/agents/[category]/[slug].md`
+2. Add frontmatter with required fields
+3. Write the prompt content
+4. Submit PR
+
+See [CLAUDE.md](CLAUDE.md) for contribution guidelines.
+
+## Tech Stack
+
+- Next.js 14 (App Router)
+- TypeScript
+- Tailwind CSS
+- Static Site Generation
+
+## License
+
+MIT - use freely in personal and commercial projects.
+
+## Author
+
+[Blainer Costa](https://github.com/blainercosta)
