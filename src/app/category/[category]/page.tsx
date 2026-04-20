@@ -1,9 +1,9 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { getAgentsByCategory } from '@/lib/agents';
-import { getCategoryLabel } from '@/lib/utils';
+import { getCategoryLabel, parseSortParam, sortAgents } from '@/lib/utils';
 import { Category, type ListedAgent } from '@/types/agent';
-import { Header, Footer, AgentGrid, CategoryFilter } from '@/components';
+import { Header, Footer, AgentGrid, CategoryFilter, SortControl } from '@/components';
 import { createClient } from '@/lib/supabase/server';
 import { getApprovedCommunityAgents } from '@/lib/supabase/community';
 import {
@@ -15,6 +15,9 @@ import {
 interface CategoryPageProps {
   params: {
     category: string;
+  };
+  searchParams: {
+    sort?: string;
   };
 }
 
@@ -45,13 +48,14 @@ export async function generateMetadata({ params }: CategoryPageProps) {
   };
 }
 
-export default async function CategoryPage({ params }: CategoryPageProps) {
+export default async function CategoryPage({ params, searchParams }: CategoryPageProps) {
   const category = params.category as Category;
 
   if (!validCategories.includes(category)) {
     notFound();
   }
 
+  const sort = parseSortParam(searchParams.sort);
   const officialAgents = getAgentsByCategory(category);
   const supabase = createClient();
 
@@ -70,9 +74,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
   const listed: ListedAgent[] = [
     ...officialAgents.map((a) => ({ source: 'official' as const, ...a })),
     ...communityAgents.map((a) => ({ source: 'community' as const, ...a })),
-  ].sort(
-    (a, b) => new Date(b.updated).getTime() - new Date(a.updated).getTime()
-  );
+  ];
 
   const targets: VoteTarget[] = listed.map((a) => ({
     type: a.source,
@@ -86,6 +88,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
       : Promise.resolve(new Set<string>()),
   ]);
 
+  const sortedList = sortAgents(listed, sort, voteCounts);
   const categoryLabel = getCategoryLabel(category);
 
   return (
@@ -114,12 +117,16 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
         </section>
 
         <section className="max-w-6xl mx-auto px-6 pb-20">
-          <CategoryFilter activeCategory={category} />
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+            <CategoryFilter activeCategory={category} />
+            <SortControl active={sort} basePath={`/category/${category}`} />
+          </div>
           <AgentGrid
-            agents={listed}
+            agents={sortedList}
             voteCounts={voteCounts}
             votedSet={votedSet}
             isAuthenticated={!!user}
+            fromCategory={category}
           />
         </section>
       </main>

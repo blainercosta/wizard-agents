@@ -4,11 +4,20 @@ export default function Footer() {
       <div className="max-w-6xl mx-auto px-6 py-8">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
           <p className="text-text-muted text-xs">
-            Wizard Agents by Blainer Costa
+            <span className="text-text-secondary">Wizard Agents</span> · An open
+            directory of Claude Code prompts · Made by{' '}
+            <a
+              href="https://github.com/blainercosta"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-text-secondary hover:text-text-primary transition-colors"
+            >
+              @blainercosta
+            </a>
           </p>
           <div className="flex items-center gap-2 text-text-muted text-xs">
             <a
-              href="https://github.com/blainercosta"
+              href="https://github.com/blainercosta/repo-wizard"
               target="_blank"
               rel="noopener noreferrer"
               className="hover:text-text-primary transition-colors"
@@ -16,7 +25,7 @@ export default function Footer() {
               GitHub
             </a>
             <span className="text-text-subtle">·</span>
-            <span>MIT License</span>
+            <span>MIT</span>
           </div>
         </div>
       </div>

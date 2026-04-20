@@ -7,6 +7,7 @@ interface AgentGridProps {
   voteCounts: Map<string, number>;
   votedSet: Set<string>;
   isAuthenticated: boolean;
+  fromCategory?: string;
 }
 
 export default function AgentGrid({
@@ -14,6 +15,7 @@ export default function AgentGrid({
   voteCounts,
   votedSet,
   isAuthenticated,
+  fromCategory,
 }: AgentGridProps) {
   if (agents.length === 0) {
     return (
@@ -40,6 +42,7 @@ export default function AgentGrid({
             voteCount={voteCounts.get(key) ?? 0}
             hasVoted={votedSet.has(key)}
             isAuthenticated={isAuthenticated}
+            fromCategory={fromCategory}
           />
         );
       })}

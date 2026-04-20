@@ -10,12 +10,25 @@ import {
   getUserVoteState,
   getPublicSupporters,
 } from '@/lib/supabase/votes';
+import { Category } from '@/types/agent';
 
 interface AgentPageProps {
   params: {
     slug: string;
   };
+  searchParams: {
+    from?: string;
+  };
 }
+
+const validCategories: Category[] = [
+  'design',
+  'development',
+  'automation',
+  'writing',
+  'business',
+  'marketing',
+];
 
 export async function generateStaticParams() {
   const slugs = getAllSlugs();
@@ -37,12 +50,21 @@ export async function generateMetadata({ params }: AgentPageProps) {
   };
 }
 
-export default async function AgentPage({ params }: AgentPageProps) {
+export default async function AgentPage({ params, searchParams }: AgentPageProps) {
   const agent = getAgentBySlug(params.slug);
 
   if (!agent) {
     notFound();
   }
+
+  const fromCategory =
+    searchParams.from && validCategories.includes(searchParams.from as Category)
+      ? (searchParams.from as Category)
+      : null;
+  const backHref = fromCategory ? `/category/${fromCategory}` : '/';
+  const backLabel = fromCategory
+    ? `Back to ${getCategoryLabel(fromCategory)}`
+    : 'All agents';
 
   const supabase = createClient();
   const {
@@ -76,10 +98,10 @@ export default async function AgentPage({ params }: AgentPageProps) {
       <main className="flex-1">
         <div className="max-w-3xl mx-auto px-6 py-12">
           <Link
-            href="/"
+            href={backHref}
             className="inline-flex items-center gap-1.5 text-[13px] text-text-muted hover:text-text-primary transition-colors mb-10"
           >
-            <ArrowLeft className="w-3.5 h-3.5" /> Back to list
+            <ArrowLeft className="w-3.5 h-3.5" /> {backLabel}
           </Link>
 
           <div className="mb-8">
@@ -123,7 +145,7 @@ export default async function AgentPage({ params }: AgentPageProps) {
                     {agent.tags.map((tag) => (
                       <span
                         key={tag}
-                        className="inline-flex items-center h-5 px-2 text-[11px] font-medium text-accent-lilac border border-accent-lilac/30 rounded-full"
+                        className="inline-flex items-center h-5 px-2 text-[11px] font-medium text-text-secondary bg-white/[0.04] rounded-full"
                       >
                         {tag}
                       </span>
@@ -141,14 +163,14 @@ export default async function AgentPage({ params }: AgentPageProps) {
           <div className="flex flex-wrap gap-2 mb-10">
             <CopyButton
               content={agent.rawContent}
-              label="Copy agent"
+              label="Copy prompt"
               copiedLabel="Copied"
               className="h-9 px-4 text-white bg-accent-brand hover:bg-accent-hover rounded-md"
             />
             <DownloadButton
               content={agent.rawContent}
               filename={`${agent.slug}.md`}
-              label="Download .md"
+              label="Download"
               className="h-9 px-4 text-text-secondary bg-white/[0.02] border border-border hover:bg-white/[0.05] hover:text-text-primary rounded-md"
             />
           </div>

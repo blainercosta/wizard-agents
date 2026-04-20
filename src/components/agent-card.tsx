@@ -19,6 +19,7 @@ interface AgentCardProps {
   voteCount: number;
   hasVoted: boolean;
   isAuthenticated: boolean;
+  fromCategory?: string;
 }
 
 export default function AgentCard({
@@ -26,6 +27,7 @@ export default function AgentCard({
   voteCount,
   hasVoted,
   isAuthenticated,
+  fromCategory,
 }: AgentCardProps) {
   const [copied, setCopied] = useState(false);
 
@@ -50,7 +52,7 @@ export default function AgentCard({
   const author = agent.source === 'community' ? agent.author : null;
 
   return (
-    <Link href={agentHref(agent)} className="block group">
+    <Link href={agentHref(agent, fromCategory)} className="block group">
       <article className="relative h-full flex flex-col p-5 bg-white/[0.02] border border-border rounded-lg transition-colors group-hover:bg-white/[0.04] group-hover:border-border-solid">
         <div className="flex items-start justify-between gap-3 mb-2">
           <div className="flex items-center gap-2 flex-wrap min-w-0">
@@ -58,7 +60,7 @@ export default function AgentCard({
               {agent.name}
             </h3>
             {isNew(agent.created) && (
-              <span className="inline-flex items-center h-5 px-2 text-[10px] font-medium text-background-primary bg-accent-neon rounded-full">
+              <span className="inline-flex items-center h-5 px-2 text-[10px] font-medium text-text-primary bg-white/[0.08] border border-border rounded-full">
                 New
               </span>
             )}
@@ -128,7 +130,7 @@ export default function AgentCard({
             onClick={handleCopy}
             className="flex-1 inline-flex items-center justify-center h-8 px-3 text-[13px] font-medium text-white bg-accent-brand hover:bg-accent-hover rounded-md transition-colors"
           >
-            {copied ? 'Copied' : 'Copy'}
+            {copied ? 'Copied' : 'Copy prompt'}
           </button>
           <button
             onClick={handleDownload}

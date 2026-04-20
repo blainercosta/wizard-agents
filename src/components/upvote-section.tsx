@@ -73,16 +73,21 @@ export default function UpvoteSection({
           size="md"
         />
 
-        {isAuthenticated && initialVoted && (
-          <label className="inline-flex items-center gap-2 text-[13px] text-text-secondary cursor-pointer select-none">
+        {isAuthenticated && currentUser && initialVoted && (
+          <label className="inline-flex items-start gap-2 text-[13px] text-text-secondary cursor-pointer select-none">
             <input
               type="checkbox"
               checked={isPublic}
               onChange={togglePublic}
               disabled={pending}
-              className="w-4 h-4 rounded border border-border bg-white/[0.02] accent-accent-lilac"
+              className="mt-0.5 w-4 h-4 rounded border border-border bg-white/[0.02] accent-accent-lilac"
             />
-            Show me as supporter
+            <span>
+              Show my <span className="text-text-primary">@{currentUser.username}</span> publicly
+              <span className="block text-xs text-text-muted mt-0.5">
+                Others will see you endorsed this agent.
+              </span>
+            </span>
           </label>
         )}
       </div>

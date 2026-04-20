@@ -63,7 +63,9 @@ export default function SubmissionForm() {
 
       if (rpcError) {
         if (rpcError.code === '23505') {
-          setError('Slug already in use. Try a slightly different name.');
+          setError(
+            `An agent named "${name.trim()}" already exists. Try a different name or add a qualifier (e.g. "${name.trim()} Pro").`
+          );
         } else {
           setError(rpcError.message);
         }
@@ -150,8 +152,8 @@ export default function SubmissionForm() {
       </Field>
 
       <Field
-        label="Prompt content"
-        hint="Markdown. Do not include YAML frontmatter — it is generated on output."
+        label="Prompt"
+        hint="Write in Markdown. The YAML header is added automatically."
       >
         <textarea
           value={content}
@@ -177,7 +179,7 @@ export default function SubmissionForm() {
           {pending ? 'Submitting...' : 'Submit for review'}
         </button>
         <p className="text-text-muted text-xs">
-          Your agent will be reviewed before appearing publicly.
+          We review every agent before it goes public. Usually within 48 hours.
         </p>
       </div>
 
