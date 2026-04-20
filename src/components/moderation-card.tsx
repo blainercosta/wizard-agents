@@ -142,13 +142,13 @@ export default function ModerationCard({ agent }: Props) {
             onChange={(e) => setReason(e.target.value)}
             placeholder="Reason for rejection (shown to author)"
             rows={3}
-            className="w-full bg-white/[0.02] border border-border rounded-md px-3 py-2 text-[13px] text-text-primary placeholder:text-text-subtle focus:outline-none focus:border-accent-lilac"
+            className="w-full bg-white/[0.02] border border-border rounded-md px-3 py-2 text-[13px] text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent-lilac focus:shadow-focus"
           />
           <div className="flex gap-2">
             <button
               onClick={handleReject}
               disabled={pending}
-              className="inline-flex items-center h-8 px-3 text-[13px] font-medium text-white bg-red-500 hover:bg-red-600 rounded-full transition-colors disabled:opacity-60"
+              className="inline-flex items-center h-8 px-3 text-[13px] font-medium text-text-primary bg-red-500/90 hover:bg-red-500 rounded-full transition-colors disabled:opacity-60"
             >
               {pending ? 'Rejecting...' : 'Confirm reject'}
             </button>
@@ -169,7 +169,7 @@ export default function ModerationCard({ agent }: Props) {
           <button
             onClick={handleApprove}
             disabled={pending}
-            className="inline-flex items-center h-8 px-3 text-[13px] font-medium text-white bg-accent-brand hover:bg-accent-hover rounded-full transition-colors disabled:opacity-60"
+            className="inline-flex items-center h-8 px-3 text-[13px] font-medium text-text-primary bg-accent-brand hover:bg-accent-hover rounded-full transition-colors disabled:opacity-60"
           >
             {pending ? 'Approving...' : 'Approve'}
           </button>

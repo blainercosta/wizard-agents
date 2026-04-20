@@ -196,7 +196,7 @@ export default async function AgentPage({ params, searchParams }: AgentPageProps
               content={agent.rawContent}
               label="Copy prompt"
               copiedLabel="Copied"
-              className="h-9 px-4 text-white bg-accent-brand hover:bg-accent-hover rounded-full"
+              className="h-9 px-4 text-text-primary bg-accent-brand hover:bg-accent-hover rounded-full"
             />
             <DownloadButton
               content={agent.rawContent}

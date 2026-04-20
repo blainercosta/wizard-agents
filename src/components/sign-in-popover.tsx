@@ -56,7 +56,7 @@ export default function SignInPopover({
       <div className="flex gap-2">
         <button
           onClick={signIn}
-          className="inline-flex items-center gap-1.5 h-7 px-2.5 text-xs font-medium text-white bg-accent-brand hover:bg-accent-hover rounded-full transition-colors"
+          className="inline-flex items-center gap-1.5 h-7 px-2.5 text-xs font-medium text-text-primary bg-accent-brand hover:bg-accent-hover rounded-full transition-colors"
         >
           <Github className="w-3.5 h-3.5" />
           Continue
