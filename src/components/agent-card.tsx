@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { BadgeCheck } from 'lucide-react';
 import { isCurated, type CommunityAgent } from '@/types/agent';
 import {
   getCategoryLabel,
@@ -48,16 +49,26 @@ export default function AgentCard({
 
   const tags = agent.tags ?? [];
   const hiddenTags = tags.length > 3 ? tags.slice(3) : [];
-  const showAuthor = !isCurated(agent);
+  const curated = isCurated(agent);
+  const showAuthor = !curated;
 
   return (
     <Link href={agentHref(agent, fromCategory)} className="block group">
       <article className="relative h-full flex flex-col p-5 bg-white/[0.02] border border-border rounded-lg transition-colors group-hover:bg-white/[0.04] group-hover:border-border-solid">
         <div className="flex items-start justify-between gap-3 mb-2">
-          <div className="flex items-center gap-2 flex-wrap min-w-0">
+          <div className="flex items-center gap-1.5 flex-wrap min-w-0">
             <h3 className="text-[15px] font-semibold text-text-primary tracking-tight truncate">
               {agent.name}
             </h3>
+            {curated && (
+              <BadgeCheck
+                className="w-4 h-4 text-accent-hover shrink-0"
+                strokeWidth={2.25}
+                aria-label="Verified — maintainer-curated"
+              >
+                <title>Verified — maintainer-curated</title>
+              </BadgeCheck>
+            )}
             {isNew(agent.created) && (
               <span className="inline-flex items-center h-5 px-2 text-[10px] font-medium text-text-primary bg-white/[0.08] border border-border rounded-full">
                 New
