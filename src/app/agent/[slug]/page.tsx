@@ -71,7 +71,7 @@ export default async function AgentPage({ params, searchParams }: AgentPageProps
       ? getUserVoteState(supabase, user.id, agent.id)
       : Promise.resolve({ voted: false, isPublic: false }),
     getPublicSupporters(supabase, agent.id),
-    getCommentsForAgent(supabase, agent.id),
+    getCommentsForAgent(supabase, agent.id, user?.id ?? null),
     hasHistory ? getVersionsForAgent(supabase, agent.id) : Promise.resolve([]),
   ]);
   const voteCount = countsMap.get(agent.id) ?? 0;
