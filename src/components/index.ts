@@ -14,7 +14,6 @@ export { Button, LinkButton } from './button';
 export { default as SortControl, type SortKey } from './sort-control';
 export { default as SkeletonGrid, ListingSkeleton, StatsSkeleton } from './skeleton-grid';
 export { default as AgentListing } from './agent-listing';
-export { default as HeroStats } from './hero-stats';
 export { default as VerifiedBadge } from './verified-badge';
 export { default as BookmarkButton } from './bookmark-button';
 export { default as SignInPopover } from './sign-in-popover';
