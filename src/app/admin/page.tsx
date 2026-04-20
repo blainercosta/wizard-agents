@@ -145,7 +145,7 @@ function HistoryCard({
             {isApproved ? (
               <Link
                 href={href}
-                className="text-[15px] font-semibold text-text-primary tracking-tight hover:text-accent-lilac transition-colors"
+                className="text-[15px] font-semibold text-text-primary tracking-tight hover:text-accent-lilac underline underline-offset-2 decoration-border-subtle hover:decoration-accent-lilac/60 transition-colors"
               >
                 {agent.name}
               </Link>
