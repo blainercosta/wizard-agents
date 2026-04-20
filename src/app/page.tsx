@@ -4,9 +4,7 @@ import {
   Footer,
   LinkButton,
   AgentListing,
-  HeroStats,
   ListingSkeleton,
-  StatsSkeleton,
 } from '@/components';
 import type { Category } from '@/types/agent';
 import { parseSortParam } from '@/lib/utils';
@@ -40,7 +38,7 @@ export default function Home({
             Copy one in. Submit yours. Let upvotes settle the rest.
           </p>
 
-          <div className="flex flex-wrap items-center gap-2 mb-6">
+          <div className="flex flex-wrap items-center gap-2">
             <LinkButton href="#agents" variant="ghost" size="lg">
               Browse agents
             </LinkButton>
@@ -48,10 +46,6 @@ export default function Home({
               Submit yours →
             </LinkButton>
           </div>
-
-          <Suspense fallback={<StatsSkeleton />}>
-            <HeroStats />
-          </Suspense>
         </section>
 
         <section id="agents" className="max-w-6xl mx-auto px-6 pb-20 scroll-mt-16">
