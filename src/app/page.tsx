@@ -1,33 +1,73 @@
-import { getAllAgents } from '@/lib/agents';
-import { Header, Footer, AgentGrid, CategoryFilter } from '@/components';
+import { Suspense } from 'react';
+import {
+  Header,
+  Footer,
+  LinkButton,
+  AgentListing,
+  HeroStats,
+  ListingSkeleton,
+  StatsSkeleton,
+} from '@/components';
+import type { Category } from '@/types/agent';
+import { parseSortParam } from '@/lib/utils';
 
-export default function Home() {
-  const agents = getAllAgents();
+const validCategories: Category[] = [
+  'design',
+  'development',
+  'automation',
+  'writing',
+  'business',
+  'marketing',
+];
+
+function parseCategoryParam(raw: string | string[] | undefined): Category | 'all' {
+  const val = Array.isArray(raw) ? raw[0] : raw;
+  if (val && validCategories.includes(val as Category)) return val as Category;
+  return 'all';
+}
+
+export default function Home({
+  searchParams,
+}: {
+  searchParams: { category?: string; sort?: string };
+}) {
+  const activeCategory = parseCategoryParam(searchParams.category);
+  const sort = parseSortParam(searchParams.sort);
 
   return (
     <div className="min-h-screen flex flex-col bg-background-primary">
       <Header />
 
       <main className="flex-1">
-        {/* Hero Section */}
-        <section className="border-b border-border bg-background-secondary mb-8">
-          <div className="max-w-6xl mx-auto px-4 pt-16 pb-12">
-            <h1 className="font-pixel text-xl md:text-2xl text-text-primary mb-4 leading-relaxed">
-              WIZARD<span className="text-accent-neon">_</span>AGENTS
-            </h1>
-            <p className="text-text-secondary font-mono text-sm md:text-base max-w-xl mb-2">
-              Ready-to-use agents for Claude Code.
-            </p>
-            <p className="text-text-muted font-mono text-sm">
-              Copy. Use. Done.
-            </p>
+        <section className="max-w-6xl mx-auto px-6 pt-20 pb-14">
+          <h1 className="text-4xl md:text-5xl font-medium text-text-primary tracking-display leading-tight mb-5">
+            Prompts for Claude Code that people actually use.
+          </h1>
+          <p className="text-lg text-text-secondary max-w-xl leading-relaxed mb-8">
+            Copy one in. Submit yours. Let upvotes settle the rest.
+          </p>
+
+          <div className="flex flex-wrap items-center gap-2 mb-6">
+            <LinkButton href="#agents" variant="ghost" size="lg">
+              Browse agents
+            </LinkButton>
+            <LinkButton href="/submit" variant="primary" size="lg">
+              Submit yours →
+            </LinkButton>
           </div>
+
+          <Suspense fallback={<StatsSkeleton />}>
+            <HeroStats />
+          </Suspense>
         </section>
 
-        {/* Agents Section */}
-        <section className="max-w-6xl mx-auto px-4">
-          <CategoryFilter activeCategory="all" />
-          <AgentGrid agents={agents} />
+        <section id="agents" className="max-w-6xl mx-auto px-6 pb-20 scroll-mt-16">
+          <Suspense
+            key={`${activeCategory}-${sort}`}
+            fallback={<ListingSkeleton />}
+          >
+            <AgentListing activeCategory={activeCategory} sort={sort} />
+          </Suspense>
         </section>
       </main>
 

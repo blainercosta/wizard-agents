@@ -1,16 +1,17 @@
 import type { Metadata } from "next";
-import { Press_Start_2P, JetBrains_Mono } from "next/font/google";
+import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 
-const pressStart2P = Press_Start_2P({
-  weight: "400",
+const inter = Inter({
   subsets: ["latin"],
-  variable: "--font-pixel",
+  variable: "--font-inter",
+  display: "swap",
 });
 
 const jetbrainsMono = JetBrains_Mono({
   subsets: ["latin"],
   variable: "--font-mono",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -26,7 +27,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${pressStart2P.variable} ${jetbrainsMono.variable} font-mono antialiased bg-background-primary text-text-primary`}
+        className={`${inter.variable} ${jetbrainsMono.variable} font-sans antialiased bg-background-primary text-text-primary`}
       >
         {children}
       </body>

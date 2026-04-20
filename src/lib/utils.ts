@@ -49,6 +49,53 @@ export function slugify(text: string): string {
     .replace(/(^-|-$)/g, '');
 }
 
+import type { ListedAgent } from '@/types/agent';
+import type { SortKey } from '@/components/sort-control';
+
+export function agentHref(agent: ListedAgent, fromCategory?: string): string {
+  const base =
+    agent.source === 'community'
+      ? `/community/${agent.slug}`
+      : `/agent/${agent.slug}`;
+  return fromCategory ? `${base}?from=${fromCategory}` : base;
+}
+
+export function agentVoteTargetId(agent: ListedAgent): string {
+  return agent.source === 'community' ? agent.id : agent.slug;
+}
+
+export function sortAgents(
+  agents: ListedAgent[],
+  sort: SortKey,
+  voteCounts?: Map<string, number>
+): ListedAgent[] {
+  const copy = [...agents];
+  if (sort === 'top' && voteCounts) {
+    copy.sort((a, b) => {
+      const ka = `${a.source}:${agentVoteTargetId(a)}`;
+      const kb = `${b.source}:${agentVoteTargetId(b)}`;
+      const diff = (voteCounts.get(kb) ?? 0) - (voteCounts.get(ka) ?? 0);
+      if (diff !== 0) return diff;
+      return new Date(b.updated).getTime() - new Date(a.updated).getTime();
+    });
+  } else if (sort === 'new') {
+    copy.sort(
+      (a, b) => new Date(b.created).getTime() - new Date(a.created).getTime()
+    );
+  } else {
+    copy.sort(
+      (a, b) => new Date(b.updated).getTime() - new Date(a.updated).getTime()
+    );
+  }
+  return copy;
+}
+
+export function parseSortParam(raw: string | string[] | undefined): SortKey {
+  const val = Array.isArray(raw) ? raw[0] : raw;
+  if (val === 'top' || val === 'new') return val;
+  return 'recent';
+}
+
 export function isNew(dateString: string, daysThreshold: number = 14): boolean {
   const date = new Date(dateString);
   const now = new Date();

@@ -1,8 +1,8 @@
 'use client';
 
 import { useState } from 'react';
+import { Copy, Check } from 'lucide-react';
 import { copyToClipboard } from '@/lib/utils';
-import { CopyIcon, CheckIcon } from './pixel-icons';
 
 interface CopyButtonProps {
   content: string;
@@ -30,10 +30,10 @@ export default function CopyButton({
   return (
     <button
       onClick={handleCopy}
-      className={`inline-flex items-center gap-2 px-4 py-2 font-mono text-sm transition-all duration-150 ${className}`}
+      className={`inline-flex items-center gap-2 text-[13px] font-medium transition-colors ${className}`}
       aria-label={copied ? copiedLabel : label}
     >
-      {copied ? <CheckIcon className="w-4 h-4" /> : <CopyIcon className="w-4 h-4" />}
+      {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
       {copied ? copiedLabel : label}
     </button>
   );

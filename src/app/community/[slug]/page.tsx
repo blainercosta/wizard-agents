@@ -1,10 +1,18 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import { ArrowLeft } from 'lucide-react';
-import { getAgentBySlug, getAllSlugs } from '@/lib/agents';
 import { formatDate, getCategoryLabel, isNew } from '@/lib/utils';
-import { Header, Footer, CopyButton, DownloadButton, MarkdownPreview, UpvoteSection } from '@/components';
+import {
+  Header,
+  Footer,
+  CopyButton,
+  DownloadButton,
+  MarkdownPreview,
+  UpvoteSection,
+} from '@/components';
 import { createClient } from '@/lib/supabase/server';
+import { getCommunityAgentBySlug } from '@/lib/supabase/community';
 import {
   getVoteCountsBatch,
   getUserVoteState,
@@ -12,13 +20,9 @@ import {
 } from '@/lib/supabase/votes';
 import { Category } from '@/types/agent';
 
-interface AgentPageProps {
-  params: {
-    slug: string;
-  };
-  searchParams: {
-    from?: string;
-  };
+interface CommunityAgentPageProps {
+  params: { slug: string };
+  searchParams: { from?: string };
 }
 
 const validCategories: Category[] = [
@@ -30,28 +34,22 @@ const validCategories: Category[] = [
   'marketing',
 ];
 
-export async function generateStaticParams() {
-  const slugs = getAllSlugs();
-  return slugs.map((slug) => ({ slug }));
-}
-
-export async function generateMetadata({ params }: AgentPageProps) {
-  const agent = getAgentBySlug(params.slug);
-
-  if (!agent) {
-    return {
-      title: 'Agent not found - Wizard Agents',
-    };
-  }
-
+export async function generateMetadata({ params }: CommunityAgentPageProps) {
+  const supabase = createClient();
+  const agent = await getCommunityAgentBySlug(supabase, params.slug);
+  if (!agent) return { title: 'Agent not found - Wizard Agents' };
   return {
     title: `${agent.name} - Wizard Agents`,
     description: agent.description,
   };
 }
 
-export default async function AgentPage({ params, searchParams }: AgentPageProps) {
-  const agent = getAgentBySlug(params.slug);
+export default async function CommunityAgentPage({
+  params,
+  searchParams,
+}: CommunityAgentPageProps) {
+  const supabase = createClient();
+  const agent = await getCommunityAgentBySlug(supabase, params.slug);
 
   if (!agent) {
     notFound();
@@ -66,12 +64,11 @@ export default async function AgentPage({ params, searchParams }: AgentPageProps
     ? `Back to ${getCategoryLabel(fromCategory)}`
     : 'All agents';
 
-  const supabase = createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const target = { type: 'official' as const, id: agent.slug };
+  const target = { type: 'community' as const, id: agent.id };
   const [countsMap, voteState, supporters] = await Promise.all([
     getVoteCountsBatch(supabase, [target]),
     user
@@ -79,7 +76,7 @@ export default async function AgentPage({ params, searchParams }: AgentPageProps
       : Promise.resolve({ voted: false, isPublic: false }),
     getPublicSupporters(supabase, target),
   ]);
-  const voteCount = countsMap.get(`official:${agent.slug}`) ?? 0;
+  const voteCount = countsMap.get(`community:${agent.id}`) ?? 0;
 
   const currentUser = user
     ? {
@@ -112,6 +109,9 @@ export default async function AgentPage({ params, searchParams }: AgentPageProps
               <span className="inline-flex items-center h-5 px-2 text-[11px] font-medium text-text-muted bg-white/[0.04] rounded-full">
                 v{agent.version}
               </span>
+              <span className="inline-flex items-center h-5 px-2 text-[10px] font-medium text-accent-lilac border border-accent-lilac/40 rounded-full">
+                Community
+              </span>
               {isNew(agent.created) && (
                 <span className="inline-flex items-center h-5 px-2 text-[10px] font-medium text-background-primary bg-accent-neon rounded-full">
                   New
@@ -124,18 +124,27 @@ export default async function AgentPage({ params, searchParams }: AgentPageProps
             </p>
 
             <div className="flex flex-col gap-2.5 text-[13px]">
-              <div className="flex items-start gap-2 flex-wrap">
-                <span className="text-text-muted shrink-0">Works with</span>
-                <span className="inline-flex flex-wrap gap-1.5">
-                  {agent.compatibility.map((item) => (
-                    <span
-                      key={item}
-                      className="inline-flex items-center h-5 px-2 text-[11px] font-medium text-text-secondary bg-white/[0.04] rounded-full"
-                    >
-                      {item}
-                    </span>
-                  ))}
-                </span>
+              <div className="flex items-center gap-2">
+                <span className="text-text-muted shrink-0">By</span>
+                <a
+                  href={`https://github.com/${agent.author.username}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 h-6 pl-0.5 pr-2 rounded-full bg-white/[0.04] border border-border-subtle hover:bg-white/[0.08] transition-colors"
+                >
+                  {agent.author.avatarUrl && (
+                    <Image
+                      src={agent.author.avatarUrl}
+                      alt={agent.author.username}
+                      width={18}
+                      height={18}
+                      className="rounded-full"
+                    />
+                  )}
+                  <span className="text-xs text-text-secondary">
+                    @{agent.author.username}
+                  </span>
+                </a>
               </div>
 
               {agent.tags && agent.tags.length > 0 && (
@@ -177,8 +186,8 @@ export default async function AgentPage({ params, searchParams }: AgentPageProps
 
           <div className="mb-12">
             <UpvoteSection
-              targetType="official"
-              targetId={agent.slug}
+              targetType="community"
+              targetId={agent.id}
               initialCount={voteCount}
               initialVoted={voteState.voted}
               initialIsPublic={voteState.isPublic}
