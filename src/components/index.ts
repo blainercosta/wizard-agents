@@ -18,3 +18,4 @@ export { default as HeroStats } from './hero-stats';
 export { default as VerifiedBadge } from './verified-badge';
 export { default as BookmarkButton } from './bookmark-button';
 export { default as SignInPopover } from './sign-in-popover';
+export { default as SignInWithGithubButton } from './sign-in-github-button';
