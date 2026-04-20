@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Header, Footer } from '@/components';
+import { Header, Footer, SignInWithGithubButton } from '@/components';
 
 export const metadata = {
   title: 'Login required - Wizard Agents',
@@ -18,12 +18,15 @@ export default function LoginRequiredPage() {
             Use your GitHub account to submit an agent. Your profile is used
             for attribution only.
           </p>
-          <Link
-            href="/"
-            className="inline-flex items-center h-9 px-4 text-[13px] font-medium text-text-secondary bg-white/[0.02] border border-border rounded-full hover:bg-white/[0.05] hover:text-text-primary transition-colors"
-          >
-            Back to home
-          </Link>
+          <div className="flex flex-wrap gap-2 justify-center">
+            <SignInWithGithubButton next="/submit" />
+            <Link
+              href="/"
+              className="inline-flex items-center h-9 px-4 text-[13px] font-medium text-text-secondary bg-white/[0.02] border border-border rounded-full hover:bg-white/[0.05] hover:text-text-primary transition-colors"
+            >
+              Back to home
+            </Link>
+          </div>
         </div>
       </main>
       <Footer />
