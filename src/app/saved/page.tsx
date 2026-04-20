@@ -53,6 +53,8 @@ export default async function SavedPage() {
             {agents.length} agent{agents.length !== 1 ? 's' : ''} you saved for later.
           </p>
 
+          <h2 className="sr-only">Saved agents</h2>
+
           {agents.length === 0 ? (
             <div className="bg-white/[0.02] border border-border rounded-lg p-10 text-center max-w-2xl mx-auto">
               <Bookmark
