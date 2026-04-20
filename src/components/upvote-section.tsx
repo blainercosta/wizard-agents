@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useTransition } from 'react';
+import Link from 'next/link';
 import Image from 'next/image';
 import { createClient } from '@/lib/supabase/client';
 import { VOTE_TARGET_TYPE } from '@/lib/supabase/votes';
@@ -97,11 +98,9 @@ export default function UpvoteSection({
           </div>
           <div className="flex flex-wrap gap-1.5">
             {supporters.map((s) => (
-              <a
+              <Link
                 key={s.username}
-                href={`https://github.com/${s.username}`}
-                target="_blank"
-                rel="noopener noreferrer"
+                href={`/u/${s.username}`}
                 title={`@${s.username}`}
                 className="inline-flex items-center gap-1.5 h-7 pl-1 pr-2.5 rounded-full bg-white/[0.04] border border-border-subtle hover:bg-white/[0.08] transition-colors"
               >
@@ -117,7 +116,7 @@ export default function UpvoteSection({
                 <span className="text-xs text-text-secondary">
                   @{s.username}
                 </span>
-              </a>
+              </Link>
             ))}
           </div>
         </div>

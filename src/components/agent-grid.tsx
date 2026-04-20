@@ -5,6 +5,7 @@ interface AgentGridProps {
   agents: CommunityAgent[];
   voteCounts: Map<string, number>;
   votedSet: Set<string>;
+  bookmarkedSet?: Set<string>;
   isAuthenticated: boolean;
   fromCategory?: string;
 }
@@ -13,6 +14,7 @@ export default function AgentGrid({
   agents,
   voteCounts,
   votedSet,
+  bookmarkedSet,
   isAuthenticated,
   fromCategory,
 }: AgentGridProps) {
@@ -37,6 +39,7 @@ export default function AgentGrid({
           agent={agent}
           voteCount={voteCounts.get(agent.id) ?? 0}
           hasVoted={votedSet.has(agent.id)}
+          hasBookmarked={bookmarkedSet?.has(agent.id) ?? false}
           isAuthenticated={isAuthenticated}
           fromCategory={fromCategory}
         />

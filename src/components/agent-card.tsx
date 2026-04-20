@@ -9,15 +9,18 @@ import {
   copyToClipboard,
   downloadFile,
   isNew,
+  isRecentlyUpdated,
   agentHref,
 } from '@/lib/utils';
 import UpvoteButton from './upvote-button';
+import BookmarkButton from './bookmark-button';
 import VerifiedBadge from './verified-badge';
 
 interface AgentCardProps {
   agent: CommunityAgent;
   voteCount: number;
   hasVoted: boolean;
+  hasBookmarked: boolean;
   isAuthenticated: boolean;
   fromCategory?: string;
 }
@@ -26,6 +29,7 @@ export default function AgentCard({
   agent,
   voteCount,
   hasVoted,
+  hasBookmarked,
   isAuthenticated,
   fromCategory,
 }: AgentCardProps) {
@@ -68,18 +72,30 @@ export default function AgentCard({
                 New
               </span>
             )}
+            {!isNew(agent.created) && isRecentlyUpdated(agent) && (
+              <span className="inline-flex items-center h-5 px-2 text-[10px] font-medium text-text-secondary bg-white/[0.04] border border-border-subtle rounded-full">
+                Updated
+              </span>
+            )}
             {showAuthor && (
               <span className="inline-flex items-center h-5 px-2 text-[10px] font-medium text-accent-lilac border border-accent-lilac/40 rounded-full">
                 Community
               </span>
             )}
           </div>
-          <UpvoteButton
-            targetId={agent.id}
-            initialCount={voteCount}
-            initialVoted={hasVoted}
-            isAuthenticated={isAuthenticated}
-          />
+          <div className="flex items-center gap-1.5 shrink-0">
+            <BookmarkButton
+              agentId={agent.id}
+              initialBookmarked={hasBookmarked}
+              isAuthenticated={isAuthenticated}
+            />
+            <UpvoteButton
+              targetId={agent.id}
+              initialCount={voteCount}
+              initialVoted={hasVoted}
+              isAuthenticated={isAuthenticated}
+            />
+          </div>
         </div>
 
         <div className="text-xs text-text-muted mb-3">
@@ -91,7 +107,10 @@ export default function AgentCard({
         </p>
 
         {showAuthor && (
-          <div className="flex items-center gap-2 mb-3">
+          <div
+            className="flex items-center gap-2 mb-3"
+            onClick={(e) => e.stopPropagation()}
+          >
             {agent.author.avatarUrl && (
               <Image
                 src={agent.author.avatarUrl}
@@ -101,9 +120,12 @@ export default function AgentCard({
                 className="rounded-full border border-border"
               />
             )}
-            <span className="text-xs text-text-muted">
+            <Link
+              href={`/u/${agent.author.username}`}
+              className="text-xs text-text-muted hover:text-text-primary transition-colors"
+            >
               by @{agent.author.username}
-            </span>
+            </Link>
           </div>
         )}
 

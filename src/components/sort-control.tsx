@@ -2,11 +2,11 @@ import Link from 'next/link';
 import type { Category } from '@/types/agent';
 import { buildListingHref } from './category-filter';
 
-export type SortKey = 'recent' | 'top' | 'new';
+export type SortKey = 'recent' | 'trending' | 'new';
 
 export const SORT_OPTIONS: { key: SortKey; label: string }[] = [
   { key: 'recent', label: 'Recent' },
-  { key: 'top', label: 'Top' },
+  { key: 'trending', label: 'Trending' },
   { key: 'new', label: 'New' },
 ];
 

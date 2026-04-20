@@ -47,12 +47,20 @@ export default async function Header() {
             Submit
           </Link>
           {user && (
-            <Link
-              href="/submissions"
-              className="px-3 h-8 hidden md:flex items-center text-[13px] font-medium text-text-secondary hover:text-text-primary transition-colors rounded-md"
-            >
-              Your submissions
-            </Link>
+            <>
+              <Link
+                href="/saved"
+                className="px-3 h-8 hidden md:flex items-center text-[13px] font-medium text-text-secondary hover:text-text-primary transition-colors rounded-md"
+              >
+                Saved
+              </Link>
+              <Link
+                href="/submissions"
+                className="px-3 h-8 hidden md:flex items-center text-[13px] font-medium text-text-secondary hover:text-text-primary transition-colors rounded-md"
+              >
+                Your submissions
+              </Link>
+            </>
           )}
           {isAdmin && (
             <Link
