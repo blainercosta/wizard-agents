@@ -3,7 +3,7 @@
 import { useState, useTransition } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Check, Trash2, X } from 'lucide-react';
+import { Check, Heart, MessageCircleReply, Trash2, X } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { formatDate } from '@/lib/utils';
 import type { AgentComment } from '@/lib/supabase/comments';
@@ -34,14 +34,14 @@ export default function CommentThread({
   const [error, setError] = useState<string | null>(null);
   const supabase = createClient();
 
-  const totalCount = comments.length;
+  const totalCount = countAll(comments);
   const gated = !isAuthenticated && totalCount > VISIBLE_WHEN_GATED;
-  const visibleComments = gated
+  const visibleTopLevel = gated
     ? comments.slice(0, VISIBLE_WHEN_GATED)
     : comments;
-  const hiddenCount = gated ? totalCount - VISIBLE_WHEN_GATED : 0;
+  const hiddenCount = gated ? totalCount - countAll(visibleTopLevel) : 0;
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function postTopLevel(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
     if (!body.trim()) return;
@@ -57,6 +57,7 @@ export default function CommentThread({
           p_agent_id: agentId,
           p_body: body.trim(),
           p_kind: 'comment',
+          p_parent_id: null,
         }
       );
 
@@ -65,43 +66,84 @@ export default function CommentThread({
         return;
       }
 
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) return;
 
-      const optimistic: AgentComment = {
-        id: newId,
-        userId: user.id,
-        username:
-          (user.user_metadata?.user_name as string) ??
-          (user.user_metadata?.preferred_username as string) ??
-          'you',
-        avatarUrl: (user.user_metadata?.avatar_url as string) ?? null,
-        body: body.trim(),
-        kind: 'comment',
-        resolved: false,
-        resolvedReply: null,
-        resolvedAt: null,
-        createdAt: new Date().toISOString(),
-      };
+      const optimistic: AgentComment = buildOptimistic(newId, user, body.trim());
       setComments((prev) => [optimistic, ...prev]);
       setBody('');
     });
   }
 
-  async function handleDelete(id: string) {
+  async function postReply(parentId: string, replyBody: string) {
+    return new Promise<boolean>((resolve) => {
+      startTransition(async () => {
+        const { data: newId, error: rpcError } = await supabase.rpc(
+          'post_comment',
+          {
+            p_agent_id: agentId,
+            p_body: replyBody,
+            p_kind: 'comment',
+            p_parent_id: parentId,
+          }
+        );
+
+        if (rpcError || !newId) {
+          console.error('Reply failed:', rpcError?.message);
+          resolve(false);
+          return;
+        }
+
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+        if (!user) {
+          resolve(false);
+          return;
+        }
+
+        const optimistic: AgentComment = buildOptimistic(
+          newId,
+          user,
+          replyBody,
+          parentId
+        );
+        setComments((prev) =>
+          prev.map((c) =>
+            c.id === parentId ? { ...c, replies: [...c.replies, optimistic] } : c
+          )
+        );
+        resolve(true);
+      });
+    });
+  }
+
+  function handleDelete(id: string, parentId: string | null) {
     startTransition(async () => {
       const { error: rpcError } = await supabase.rpc('delete_comment', {
         p_comment_id: id,
       });
       if (rpcError) {
-        console.error('Delete comment failed:', rpcError.message);
+        console.error('Delete failed:', rpcError.message);
         return;
       }
-      setComments((prev) => prev.filter((c) => c.id !== id));
+      if (parentId) {
+        setComments((prev) =>
+          prev.map((c) =>
+            c.id === parentId
+              ? { ...c, replies: c.replies.filter((r) => r.id !== id) }
+              : c
+          )
+        );
+      } else {
+        setComments((prev) => prev.filter((c) => c.id !== id));
+      }
     });
   }
 
-  async function handleResolve(id: string, reply: string) {
+  function handleResolve(id: string, reply: string) {
     startTransition(async () => {
       const { error: rpcError } = await supabase.rpc('resolve_comment', {
         p_comment_id: id,
@@ -126,6 +168,64 @@ export default function CommentThread({
     });
   }
 
+  function handleToggleLike(id: string, parentId: string | null) {
+    if (!isAuthenticated) return;
+
+    const flip = (c: AgentComment): AgentComment =>
+      c.id === id
+        ? {
+            ...c,
+            likedByMe: !c.likedByMe,
+            likeCount: c.likeCount + (c.likedByMe ? -1 : 1),
+          }
+        : c;
+
+    // Optimistic
+    if (parentId) {
+      setComments((prev) =>
+        prev.map((c) =>
+          c.id === parentId
+            ? { ...c, replies: c.replies.map(flip) }
+            : c
+        )
+      );
+    } else {
+      setComments((prev) => prev.map(flip));
+    }
+
+    // Detect desired state AFTER flip (easier to reason)
+    const target =
+      parentId
+        ? comments
+            .find((c) => c.id === parentId)
+            ?.replies.find((r) => r.id === id)
+        : comments.find((c) => c.id === id);
+    const wasLiked = target?.likedByMe ?? false;
+    const shouldLike = !wasLiked;
+
+    startTransition(async () => {
+      const { error: rpcError } = shouldLike
+        ? await supabase.rpc('add_comment_like', { p_comment_id: id })
+        : await supabase.rpc('remove_comment_like', { p_comment_id: id });
+
+      if (rpcError) {
+        // Revert
+        if (parentId) {
+          setComments((prev) =>
+            prev.map((c) =>
+              c.id === parentId
+                ? { ...c, replies: c.replies.map(flip) }
+                : c
+            )
+          );
+        } else {
+          setComments((prev) => prev.map(flip));
+        }
+        console.error('Like failed:', rpcError.message);
+      }
+    });
+  }
+
   return (
     <section>
       <div className="flex items-baseline justify-between gap-4 mb-5">
@@ -138,7 +238,7 @@ export default function CommentThread({
       </div>
 
       {isAuthenticated ? (
-        <form onSubmit={handleSubmit} className="mb-6">
+        <form onSubmit={postTopLevel} className="mb-6">
           <textarea
             value={body}
             onChange={(e) => setBody(e.target.value)}
@@ -147,9 +247,7 @@ export default function CommentThread({
             maxLength={2000}
             className="w-full bg-white/[0.02] border border-border rounded-lg px-3 py-2 text-[13px] text-text-primary placeholder:text-text-subtle focus:outline-none focus:border-accent-lilac resize-none"
           />
-          {error && (
-            <div className="mt-2 text-xs text-red-400">{error}</div>
-          )}
+          {error && <div className="mt-2 text-xs text-red-400">{error}</div>}
           <div className="flex items-center justify-between mt-2">
             <span className="text-xs text-text-muted tabular-nums">
               {body.length}/2000
@@ -172,16 +270,18 @@ export default function CommentThread({
         </div>
       )}
 
-      {visibleComments.length === 0 ? (
+      {visibleTopLevel.length === 0 ? (
         <div className="text-[13px] text-text-muted py-6 text-center">
           No comments yet. Be the first to share a thought.
         </div>
       ) : (
-        <ol className="space-y-4">
-          {visibleComments.map((c) => (
+        <ol className="space-y-6">
+          {visibleTopLevel.map((c) => (
             <CommentItem
               key={c.id}
               comment={c}
+              isAuthenticated={isAuthenticated}
+              isReply={false}
               canDelete={currentUserId === c.userId}
               canResolve={
                 !!agentOwnerId &&
@@ -189,8 +289,15 @@ export default function CommentThread({
                 !c.resolved
               }
               pending={pending}
-              onDelete={() => handleDelete(c.id)}
+              currentUserId={currentUserId}
+              onDelete={() => handleDelete(c.id, null)}
               onResolve={(reply) => handleResolve(c.id, reply)}
+              onToggleLike={() => handleToggleLike(c.id, null)}
+              onReply={(text) => postReply(c.id, text)}
+              onDeleteReply={(replyId) => handleDelete(replyId, c.id)}
+              onToggleLikeReply={(replyId) =>
+                handleToggleLike(replyId, c.id)
+              }
             />
           ))}
         </ol>
@@ -212,44 +319,127 @@ export default function CommentThread({
   );
 }
 
-function CommentItem({
-  comment,
-  canDelete,
-  canResolve,
-  pending,
-  onDelete,
-  onResolve,
+function countAll(list: AgentComment[]): number {
+  let n = 0;
+  for (const c of list) n += 1 + c.replies.length;
+  return n;
+}
+
+function buildOptimistic(
+  id: string,
+  user: { id: string; user_metadata?: Record<string, unknown> },
+  body: string,
+  parentId: string | null = null
+): AgentComment {
+  return {
+    id,
+    userId: user.id,
+    username:
+      (user.user_metadata?.user_name as string) ??
+      (user.user_metadata?.preferred_username as string) ??
+      'you',
+    avatarUrl: (user.user_metadata?.avatar_url as string) ?? null,
+    body,
+    kind: 'comment',
+    resolved: false,
+    resolvedReply: null,
+    resolvedAt: null,
+    createdAt: new Date().toISOString(),
+    parentId,
+    likeCount: 0,
+    likedByMe: false,
+    replies: [],
+  };
+}
+
+function Avatar({
+  src,
+  alt,
+  size = 28,
 }: {
+  src: string | null;
+  alt: string;
+  size?: number;
+}) {
+  return (
+    <div
+      className="relative shrink-0 overflow-hidden rounded-full border border-border bg-white/[0.04]"
+      style={{ width: size, height: size }}
+    >
+      {src && (
+        <Image
+          src={src}
+          alt={alt}
+          fill
+          sizes={`${size}px`}
+          className="object-cover"
+          unoptimized
+        />
+      )}
+    </div>
+  );
+}
+
+type CommentItemProps = {
   comment: AgentComment;
+  isAuthenticated: boolean;
+  isReply: boolean;
   canDelete: boolean;
   canResolve: boolean;
   pending: boolean;
+  currentUserId: string | null;
   onDelete: () => void;
-  onResolve: (reply: string) => void;
-}) {
+  onResolve?: (reply: string) => void;
+  onToggleLike: () => void;
+  onReply?: (text: string) => Promise<boolean>;
+  onDeleteReply?: (replyId: string) => void;
+  onToggleLikeReply?: (replyId: string) => void;
+};
+
+function CommentItem({
+  comment,
+  isAuthenticated,
+  isReply,
+  canDelete,
+  canResolve,
+  pending,
+  currentUserId,
+  onDelete,
+  onResolve,
+  onToggleLike,
+  onReply,
+  onDeleteReply,
+  onToggleLikeReply,
+}: CommentItemProps) {
   const [showResolve, setShowResolve] = useState(false);
-  const [reply, setReply] = useState('');
+  const [resolveReply, setResolveReply] = useState('');
+  const [showReply, setShowReply] = useState(false);
+  const [replyBody, setReplyBody] = useState('');
+  const [replyPending, setReplyPending] = useState(false);
 
   function submitResolve() {
-    if (!reply.trim()) return;
-    onResolve(reply.trim());
+    if (!resolveReply.trim() || !onResolve) return;
+    onResolve(resolveReply.trim());
     setShowResolve(false);
-    setReply('');
+    setResolveReply('');
   }
+
+  async function submitReply() {
+    if (!replyBody.trim() || !onReply) return;
+    setReplyPending(true);
+    const ok = await onReply(replyBody.trim());
+    setReplyPending(false);
+    if (ok) {
+      setShowReply(false);
+      setReplyBody('');
+    }
+  }
+
+  const avatarSize = isReply ? 24 : 28;
 
   return (
     <li className="flex gap-3">
-      {comment.avatarUrl ? (
-        <Image
-          src={comment.avatarUrl}
-          alt={comment.username}
-          width={28}
-          height={28}
-          className="rounded-full border border-border shrink-0"
-        />
-      ) : (
-        <div className="w-7 h-7 rounded-full bg-white/[0.04] shrink-0" />
-      )}
+      <Avatar src={comment.avatarUrl} alt={comment.username} size={avatarSize} />
       <div className="flex-1 min-w-0">
         <div className="flex items-baseline gap-2 mb-1 flex-wrap">
           <Link
@@ -287,7 +477,35 @@ function CommentItem({
           </div>
         )}
 
-        <div className="flex items-center gap-2 mt-2">
+        <div className="flex items-center gap-1 mt-2 flex-wrap">
+          <button
+            onClick={onToggleLike}
+            disabled={!isAuthenticated || pending}
+            title={isAuthenticated ? undefined : 'Sign in to like'}
+            className={`inline-flex items-center gap-1 h-6 px-2 text-xs font-medium rounded-full transition-colors disabled:cursor-not-allowed ${
+              comment.likedByMe
+                ? 'text-accent-hover bg-accent-brand/10'
+                : 'text-text-muted hover:text-text-primary hover:bg-white/[0.04]'
+            } ${!isAuthenticated ? 'opacity-70' : ''}`}
+          >
+            <Heart
+              className="w-3 h-3"
+              strokeWidth={2.25}
+              fill={comment.likedByMe ? 'currentColor' : 'none'}
+            />
+            <span className="tabular-nums">{comment.likeCount}</span>
+          </button>
+
+          {!isReply && isAuthenticated && (
+            <button
+              onClick={() => setShowReply((v) => !v)}
+              className="inline-flex items-center gap-1 h-6 px-2 text-xs font-medium text-text-muted hover:text-text-primary hover:bg-white/[0.04] rounded-full transition-colors"
+            >
+              <MessageCircleReply className="w-3 h-3" strokeWidth={2} />
+              Reply
+            </button>
+          )}
+
           {canResolve && !showResolve && (
             <button
               onClick={() => setShowResolve(true)}
@@ -297,6 +515,7 @@ function CommentItem({
               Resolve
             </button>
           )}
+
           {canDelete && (
             <button
               onClick={onDelete}
@@ -315,8 +534,8 @@ function CommentItem({
               Describe how this was resolved. Required.
             </div>
             <textarea
-              value={reply}
-              onChange={(e) => setReply(e.target.value)}
+              value={resolveReply}
+              onChange={(e) => setResolveReply(e.target.value)}
               placeholder="e.g. Uploaded v1.1 with the fix mentioned above."
               rows={2}
               maxLength={500}
@@ -326,7 +545,7 @@ function CommentItem({
             <div className="flex items-center gap-2 mt-2">
               <button
                 onClick={submitResolve}
-                disabled={pending || !reply.trim()}
+                disabled={pending || !resolveReply.trim()}
                 className="inline-flex items-center gap-1 h-7 px-3 text-xs font-medium text-white bg-accent-brand hover:bg-accent-hover rounded-full transition-colors disabled:opacity-60"
               >
                 <Check className="w-3 h-3" strokeWidth={2.5} />
@@ -335,7 +554,7 @@ function CommentItem({
               <button
                 onClick={() => {
                   setShowResolve(false);
-                  setReply('');
+                  setResolveReply('');
                 }}
                 className="inline-flex items-center gap-1 h-7 px-3 text-xs font-medium text-text-secondary hover:text-text-primary hover:bg-white/[0.04] rounded-full transition-colors"
               >
@@ -344,6 +563,61 @@ function CommentItem({
               </button>
             </div>
           </div>
+        )}
+
+        {showReply && (
+          <div className="mt-3 bg-white/[0.02] border border-border rounded-lg p-3">
+            <textarea
+              value={replyBody}
+              onChange={(e) => setReplyBody(e.target.value)}
+              placeholder={`Reply to @${comment.username}…`}
+              rows={2}
+              maxLength={1000}
+              className="w-full bg-white/[0.02] border border-border rounded-md px-3 py-2 text-[13px] text-text-primary placeholder:text-text-subtle focus:outline-none focus:border-accent-lilac resize-none"
+              autoFocus
+            />
+            <div className="flex items-center gap-2 mt-2">
+              <button
+                onClick={submitReply}
+                disabled={replyPending || !replyBody.trim()}
+                className="inline-flex items-center h-7 px-3 text-xs font-medium text-white bg-accent-brand hover:bg-accent-hover rounded-full transition-colors disabled:opacity-60"
+              >
+                {replyPending ? 'Posting…' : 'Post reply'}
+              </button>
+              <button
+                onClick={() => {
+                  setShowReply(false);
+                  setReplyBody('');
+                }}
+                className="inline-flex items-center h-7 px-3 text-xs font-medium text-text-secondary hover:text-text-primary hover:bg-white/[0.04] rounded-full transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        )}
+
+        {!isReply && comment.replies.length > 0 && (
+          <ol className="mt-4 pl-3 border-l border-border-subtle space-y-4">
+            {comment.replies.map((reply) => (
+              <CommentItem
+                key={reply.id}
+                comment={reply}
+                isAuthenticated={isAuthenticated}
+                isReply={true}
+                canDelete={currentUserId === reply.userId}
+                canResolve={false}
+                pending={pending}
+                currentUserId={currentUserId}
+                onDelete={() =>
+                  onDeleteReply && onDeleteReply(reply.id)
+                }
+                onToggleLike={() =>
+                  onToggleLikeReply && onToggleLikeReply(reply.id)
+                }
+              />
+            ))}
+          </ol>
         )}
       </div>
     </li>
