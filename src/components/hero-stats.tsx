@@ -1,10 +1,16 @@
 import { createClient } from '@/lib/supabase/server';
-import { getApprovedCommunityAgents } from '@/lib/supabase/community';
+import {
+  getApprovedCommunityAgents,
+  isCurrentUserAdmin,
+} from '@/lib/supabase/community';
 import { getVoteCountsBatch } from '@/lib/supabase/votes';
 import { isCurated } from '@/types/agent';
 
 export default async function HeroStats() {
   const supabase = createClient();
+  const isAdmin = await isCurrentUserAdmin(supabase);
+  if (!isAdmin) return null;
+
   const agents = await getApprovedCommunityAgents(supabase);
   const voteCounts = await getVoteCountsBatch(supabase, agents.map((a) => a.id));
 
