@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { createClient } from '@/lib/supabase/client';
 import { formatDate, getCategoryLabel } from '@/lib/utils';
-import type { CommunityAgent } from '@/types/agent';
+import { isDefaultCategory, type CommunityAgent } from '@/types/agent';
 import MarkdownPreview from './markdown-preview';
 
 type Props = {
@@ -65,8 +65,16 @@ export default function ModerationCard({ agent }: Props) {
               v{agent.version}
             </span>
             <span className="inline-flex items-center h-5 px-2 text-[10px] font-medium text-accent-lilac border border-accent-lilac/40 rounded-full">
-              {getCategoryLabel(agent.category)}
+              {getCategoryLabel(agent.category, agent.categoryLabel)}
             </span>
+            {!isDefaultCategory(agent.category) && (
+              <span
+                className="inline-flex items-center h-5 px-2 text-[10px] font-medium text-accent-hover bg-accent-brand/15 border border-accent-brand/40 rounded-full"
+                title="Author proposed a new category — approving the agent approves the category."
+              >
+                New category
+              </span>
+            )}
           </div>
           <div className="text-xs text-text-muted">
             /{agent.slug} · submitted {formatDate(agent.created)}
@@ -140,7 +148,7 @@ export default function ModerationCard({ agent }: Props) {
             <button
               onClick={handleReject}
               disabled={pending}
-              className="inline-flex items-center h-8 px-3 text-[13px] font-medium text-white bg-red-500 hover:bg-red-600 rounded-md transition-colors disabled:opacity-60"
+              className="inline-flex items-center h-8 px-3 text-[13px] font-medium text-white bg-red-500 hover:bg-red-600 rounded-full transition-colors disabled:opacity-60"
             >
               {pending ? 'Rejecting...' : 'Confirm reject'}
             </button>
@@ -150,7 +158,7 @@ export default function ModerationCard({ agent }: Props) {
                 setReason('');
                 setError(null);
               }}
-              className="inline-flex items-center h-8 px-3 text-[13px] font-medium text-text-secondary bg-white/[0.02] border border-border rounded-md hover:bg-white/[0.05] hover:text-text-primary transition-colors"
+              className="inline-flex items-center h-8 px-3 text-[13px] font-medium text-text-secondary bg-white/[0.02] border border-border rounded-full hover:bg-white/[0.05] hover:text-text-primary transition-colors"
             >
               Cancel
             </button>
@@ -161,14 +169,14 @@ export default function ModerationCard({ agent }: Props) {
           <button
             onClick={handleApprove}
             disabled={pending}
-            className="inline-flex items-center h-8 px-3 text-[13px] font-medium text-white bg-accent-brand hover:bg-accent-hover rounded-md transition-colors disabled:opacity-60"
+            className="inline-flex items-center h-8 px-3 text-[13px] font-medium text-white bg-accent-brand hover:bg-accent-hover rounded-full transition-colors disabled:opacity-60"
           >
             {pending ? 'Approving...' : 'Approve'}
           </button>
           <button
             onClick={() => setShowReject(true)}
             disabled={pending}
-            className="inline-flex items-center h-8 px-3 text-[13px] font-medium text-text-secondary bg-white/[0.02] border border-border rounded-md hover:border-red-500/40 hover:text-red-400 transition-colors"
+            className="inline-flex items-center h-8 px-3 text-[13px] font-medium text-text-secondary bg-white/[0.02] border border-border rounded-full hover:border-red-500/40 hover:text-red-400 transition-colors"
           >
             Reject
           </button>

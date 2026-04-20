@@ -11,18 +11,10 @@ import {
 import type { Category } from '@/types/agent';
 import { parseSortParam } from '@/lib/utils';
 
-const validCategories: Category[] = [
-  'design',
-  'development',
-  'automation',
-  'writing',
-  'business',
-  'marketing',
-];
-
 function parseCategoryParam(raw: string | string[] | undefined): Category | 'all' {
   const val = Array.isArray(raw) ? raw[0] : raw;
-  if (val && validCategories.includes(val as Category)) return val as Category;
+  // Accept any non-empty slug-safe string; listing filters to agents with that slug
+  if (val && /^[a-z0-9-]+$/.test(val)) return val;
   return 'all';
 }
 

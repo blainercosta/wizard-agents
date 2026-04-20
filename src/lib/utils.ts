@@ -1,4 +1,8 @@
-import { Category, CATEGORY_LABELS, type CommunityAgent } from '@/types/agent';
+import {
+  DEFAULT_CATEGORY_LABELS,
+  type Category,
+  type CommunityAgent,
+} from '@/types/agent';
 import type { SortKey } from '@/components/sort-control';
 
 export function formatDate(dateString: string): string {
@@ -11,8 +15,21 @@ export function formatDate(dateString: string): string {
   return date.toLocaleDateString('en-US', options);
 }
 
-export function getCategoryLabel(category: Category): string {
-  return CATEGORY_LABELS[category] || category;
+function titleCaseFromSlug(slug: string): string {
+  return slug
+    .split('-')
+    .filter(Boolean)
+    .map((w) => w[0].toUpperCase() + w.slice(1))
+    .join(' ');
+}
+
+export function getCategoryLabel(
+  category: Category,
+  fallbackLabel?: string | null
+): string {
+  if (DEFAULT_CATEGORY_LABELS[category]) return DEFAULT_CATEGORY_LABELS[category];
+  if (fallbackLabel) return fallbackLabel;
+  return titleCaseFromSlug(category);
 }
 
 export function truncateText(text: string, maxLength: number): string {

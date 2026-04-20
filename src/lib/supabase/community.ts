@@ -7,6 +7,7 @@ type Row = {
   name: string;
   description: string;
   category: Category;
+  category_label: string | null;
   version: string;
   tags: string[];
   content: string;
@@ -44,6 +45,7 @@ function rowToAgent(row: Row): CommunityAgent {
     name: row.name,
     description: row.description,
     category: row.category,
+    categoryLabel: row.category_label,
     version: row.version,
     tags: row.tags,
     content: row.content,
@@ -60,7 +62,7 @@ function rowToAgent(row: Row): CommunityAgent {
 }
 
 const COLUMNS =
-  'id, slug, name, description, category, version, tags, content, status, rejection_reason, author_username, author_avatar_url, created_at, updated_at';
+  'id, slug, name, description, category, category_label, version, tags, content, status, rejection_reason, author_username, author_avatar_url, created_at, updated_at';
 
 export async function getApprovedCommunityAgents(
   supabase: SupabaseClient

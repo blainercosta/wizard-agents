@@ -19,21 +19,15 @@ import {
   getUserVoteState,
   getPublicSupporters,
 } from '@/lib/supabase/votes';
-import { Category, isCurated } from '@/types/agent';
+import { isCurated } from '@/types/agent';
+import { DEFAULT_CATEGORY_SLUGS } from '@/types/agent';
 
 interface AgentPageProps {
   params: { slug: string };
   searchParams: { from?: string };
 }
 
-const validCategories: Category[] = [
-  'design',
-  'development',
-  'automation',
-  'writing',
-  'business',
-  'marketing',
-];
+const validCategories: readonly string[] = DEFAULT_CATEGORY_SLUGS;
 
 export async function generateMetadata({ params }: AgentPageProps) {
   const supabase = createClient();
@@ -77,8 +71,8 @@ export default async function AgentPage({ params, searchParams }: AgentPageProps
     : null;
 
   const fromCategory =
-    searchParams.from && validCategories.includes(searchParams.from as Category)
-      ? (searchParams.from as Category)
+    searchParams.from && validCategories.includes(searchParams.from)
+      ? searchParams.from
       : null;
   const backHref = fromCategory ? `/?category=${fromCategory}` : '/';
   const backLabel = fromCategory
@@ -176,7 +170,7 @@ export default async function AgentPage({ params, searchParams }: AgentPageProps
               )}
 
               <div className="text-text-muted">
-                {getCategoryLabel(agent.category)} · Updated on {formatDate(agent.updated)}
+                {getCategoryLabel(agent.category, agent.categoryLabel)} · Updated on {formatDate(agent.updated)}
               </div>
             </div>
           </div>
@@ -186,13 +180,13 @@ export default async function AgentPage({ params, searchParams }: AgentPageProps
               content={agent.rawContent}
               label="Copy prompt"
               copiedLabel="Copied"
-              className="h-9 px-4 text-white bg-accent-brand hover:bg-accent-hover rounded-md"
+              className="h-9 px-4 text-white bg-accent-brand hover:bg-accent-hover rounded-full"
             />
             <DownloadButton
               content={agent.rawContent}
               filename={`${agent.slug}.md`}
               label="Download"
-              className="h-9 px-4 text-text-secondary bg-white/[0.02] border border-border hover:bg-white/[0.05] hover:text-text-primary rounded-md"
+              className="h-9 px-4 text-text-secondary bg-white/[0.02] border border-border hover:bg-white/[0.05] hover:text-text-primary rounded-full"
             />
           </div>
 
