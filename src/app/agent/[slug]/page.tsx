@@ -119,7 +119,7 @@ export default async function AgentPage({ params, searchParams }: AgentPageProps
                 </span>
               )}
               {isNew(agent.created) && (
-                <span className="inline-flex items-center h-5 px-2 text-[10px] font-medium text-text-primary bg-white/[0.08] border border-border rounded-full">
+                <span className="inline-flex items-center h-5 px-2 text-[10px] font-medium text-accent-hover bg-accent-brand/15 border border-accent-brand/40 rounded-full">
                   New
                 </span>
               )}
