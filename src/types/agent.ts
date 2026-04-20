@@ -35,6 +35,7 @@ export interface CommunityAgent {
   updated: string;
   status: 'pending' | 'approved' | 'rejected';
   rejectionReason: string | null;
+  ownerId: string;
   author: CommunityAuthor;
 }
 

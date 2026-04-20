@@ -13,6 +13,7 @@ type Row = {
   content: string;
   status: 'pending' | 'approved' | 'rejected';
   rejection_reason: string | null;
+  user_id: string;
   author_username: string;
   author_avatar_url: string | null;
   created_at: string;
@@ -54,6 +55,7 @@ function rowToAgent(row: Row): CommunityAgent {
     updated: row.updated_at,
     status: row.status,
     rejectionReason: row.rejection_reason,
+    ownerId: row.user_id,
     author: {
       username: row.author_username,
       avatarUrl: row.author_avatar_url,
@@ -62,7 +64,7 @@ function rowToAgent(row: Row): CommunityAgent {
 }
 
 const COLUMNS =
-  'id, slug, name, description, category, category_label, version, tags, content, status, rejection_reason, author_username, author_avatar_url, created_at, updated_at';
+  'id, slug, name, description, category, category_label, version, tags, content, status, rejection_reason, user_id, author_username, author_avatar_url, created_at, updated_at';
 
 export async function getApprovedCommunityAgents(
   supabase: SupabaseClient

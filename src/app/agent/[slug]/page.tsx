@@ -11,6 +11,8 @@ import {
   MarkdownPreview,
   UpvoteSection,
   VerifiedBadge,
+  CommentThread,
+  VersionHistory,
 } from '@/components';
 import { createClient } from '@/lib/supabase/server';
 import { getCommunityAgentBySlug } from '@/lib/supabase/community';
@@ -19,6 +21,8 @@ import {
   getUserVoteState,
   getPublicSupporters,
 } from '@/lib/supabase/votes';
+import { getCommentsForAgent } from '@/lib/supabase/comments';
+import { getVersionsForAgent } from '@/lib/supabase/versions';
 import { isCurated } from '@/types/agent';
 import { DEFAULT_CATEGORY_SLUGS } from '@/types/agent';
 
@@ -51,12 +55,14 @@ export default async function AgentPage({ params, searchParams }: AgentPageProps
     data: { user },
   } = await supabase.auth.getUser();
 
-  const [countsMap, voteState, supporters] = await Promise.all([
+  const [countsMap, voteState, supporters, comments, olderVersions] = await Promise.all([
     getVoteCountsBatch(supabase, [agent.id]),
     user
       ? getUserVoteState(supabase, user.id, agent.id)
       : Promise.resolve({ voted: false, isPublic: false }),
     getPublicSupporters(supabase, agent.id),
+    getCommentsForAgent(supabase, agent.id),
+    getVersionsForAgent(supabase, agent.id),
   ]);
   const voteCount = countsMap.get(agent.id) ?? 0;
 
@@ -202,7 +208,7 @@ export default async function AgentPage({ params, searchParams }: AgentPageProps
             />
           </div>
 
-          <div className="bg-white/[0.02] border border-border rounded-lg overflow-hidden">
+          <div className="bg-white/[0.02] border border-border rounded-lg overflow-hidden mb-12">
             <div className="border-b border-border-subtle px-5 py-2.5">
               <span className="text-text-muted text-xs font-mono">
                 {agent.slug}.md
@@ -211,6 +217,21 @@ export default async function AgentPage({ params, searchParams }: AgentPageProps
             <div className="p-5 overflow-x-auto overflow-y-auto max-h-[480px]">
               <MarkdownPreview content={agent.content} />
             </div>
+          </div>
+
+          <div className="mb-12">
+            <CommentThread
+              agentId={agent.id}
+              agentSlug={agent.slug}
+              agentOwnerId={agent.ownerId}
+              initialComments={comments}
+              isAuthenticated={!!user}
+              currentUserId={user?.id ?? null}
+            />
+          </div>
+
+          <div>
+            <VersionHistory agent={agent} olderVersions={olderVersions} />
           </div>
         </div>
       </main>
