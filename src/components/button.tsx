@@ -9,13 +9,13 @@ const base =
 
 const variants: Record<Variant, string> = {
   primary:
-    'text-white bg-accent-brand hover:bg-accent-hover border border-transparent',
+    'text-text-primary bg-accent-brand hover:bg-accent-hover border border-transparent',
   ghost:
     'text-text-secondary bg-white/[0.02] border border-border hover:bg-white/[0.05] hover:text-text-primary',
   subtle:
     'text-text-secondary bg-transparent border border-transparent hover:bg-white/[0.04] hover:text-text-primary',
   danger:
-    'text-white bg-red-500 hover:bg-red-600 border border-transparent',
+    'text-text-primary bg-red-500/90 hover:bg-red-500 border border-transparent',
 };
 
 const sizes: Record<Size, string> = {

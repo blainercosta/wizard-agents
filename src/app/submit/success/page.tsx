@@ -21,7 +21,7 @@ export default function SubmitSuccessPage() {
           <div className="flex flex-wrap gap-2 justify-center">
             <Link
               href="/submissions"
-              className="inline-flex items-center h-9 px-4 text-[13px] font-medium text-white bg-accent-brand hover:bg-accent-hover rounded-full transition-colors"
+              className="inline-flex items-center h-9 px-4 text-[13px] font-medium text-text-primary bg-accent-brand hover:bg-accent-hover rounded-full transition-colors"
             >
               View your submissions
             </Link>

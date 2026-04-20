@@ -245,7 +245,7 @@ export default function CommentThread({
             placeholder="Thank the author, share a critique, suggest an improvement…"
             rows={3}
             maxLength={2000}
-            className="w-full bg-white/[0.02] border border-border rounded-lg px-3 py-2 text-[13px] text-text-primary placeholder:text-text-subtle focus:outline-none focus:border-accent-lilac resize-none"
+            className="w-full bg-white/[0.02] border border-border rounded-lg px-3 py-2 text-[13px] text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent-lilac focus:shadow-focus resize-none"
           />
           {error && <div className="mt-2 text-xs text-red-400">{error}</div>}
           <div className="flex items-center justify-between mt-2">
@@ -255,7 +255,7 @@ export default function CommentThread({
             <button
               type="submit"
               disabled={pending || !body.trim()}
-              className="inline-flex items-center h-8 px-3 text-[13px] font-medium text-white bg-accent-brand hover:bg-accent-hover rounded-full transition-colors disabled:opacity-60"
+              className="inline-flex items-center h-8 px-3 text-[13px] font-medium text-text-primary bg-accent-brand hover:bg-accent-hover rounded-full transition-colors disabled:opacity-60"
             >
               {pending ? 'Posting…' : 'Post'}
             </button>
@@ -539,14 +539,14 @@ function CommentItem({
               placeholder="e.g. Uploaded v1.1 with the fix mentioned above."
               rows={2}
               maxLength={500}
-              className="w-full bg-white/[0.02] border border-border rounded-md px-3 py-2 text-[13px] text-text-primary placeholder:text-text-subtle focus:outline-none focus:border-accent-lilac resize-none"
+              className="w-full bg-white/[0.02] border border-border rounded-md px-3 py-2 text-[13px] text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent-lilac focus:shadow-focus resize-none"
               autoFocus
             />
             <div className="flex items-center gap-2 mt-2">
               <button
                 onClick={submitResolve}
                 disabled={pending || !resolveReply.trim()}
-                className="inline-flex items-center gap-1 h-7 px-3 text-xs font-medium text-white bg-accent-brand hover:bg-accent-hover rounded-full transition-colors disabled:opacity-60"
+                className="inline-flex items-center gap-1 h-7 px-3 text-xs font-medium text-text-primary bg-accent-brand hover:bg-accent-hover rounded-full transition-colors disabled:opacity-60"
               >
                 <Check className="w-3 h-3" strokeWidth={2.5} />
                 Confirm resolve
@@ -573,14 +573,14 @@ function CommentItem({
               placeholder={`Reply to @${comment.username}…`}
               rows={2}
               maxLength={1000}
-              className="w-full bg-white/[0.02] border border-border rounded-md px-3 py-2 text-[13px] text-text-primary placeholder:text-text-subtle focus:outline-none focus:border-accent-lilac resize-none"
+              className="w-full bg-white/[0.02] border border-border rounded-md px-3 py-2 text-[13px] text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent-lilac focus:shadow-focus resize-none"
               autoFocus
             />
             <div className="flex items-center gap-2 mt-2">
               <button
                 onClick={submitReply}
                 disabled={replyPending || !replyBody.trim()}
-                className="inline-flex items-center h-7 px-3 text-xs font-medium text-white bg-accent-brand hover:bg-accent-hover rounded-full transition-colors disabled:opacity-60"
+                className="inline-flex items-center h-7 px-3 text-xs font-medium text-text-primary bg-accent-brand hover:bg-accent-hover rounded-full transition-colors disabled:opacity-60"
               >
                 {replyPending ? 'Posting…' : 'Post reply'}
               </button>

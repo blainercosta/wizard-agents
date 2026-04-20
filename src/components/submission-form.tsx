@@ -214,7 +214,7 @@ export default function SubmissionForm() {
         <button
           type="submit"
           disabled={pending}
-          className="inline-flex items-center h-9 px-4 text-[13px] font-medium text-white bg-accent-brand hover:bg-accent-hover rounded-full transition-colors disabled:opacity-60 ml-auto"
+          className="inline-flex items-center h-9 px-4 text-[13px] font-medium text-text-primary bg-accent-brand hover:bg-accent-hover rounded-full transition-colors disabled:opacity-60 ml-auto"
         >
           {pending ? 'Submitting...' : 'Submit for review'}
         </button>

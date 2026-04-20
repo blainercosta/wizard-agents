@@ -153,7 +153,7 @@ export default function AgentCard({
         <div className="flex gap-2 mt-auto">
           <button
             onClick={handleCopy}
-            className="flex-1 inline-flex items-center justify-center h-8 px-3 text-[13px] font-medium text-white bg-accent-brand hover:bg-accent-hover rounded-full transition-colors"
+            className="flex-1 inline-flex items-center justify-center h-8 px-3 text-[13px] font-medium text-text-primary bg-white/[0.05] border border-border-solid rounded-full hover:bg-white/[0.08] transition-colors"
           >
             {copied ? 'Copied' : 'Copy prompt'}
           </button>
