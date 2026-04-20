@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArrowLeft, BadgeCheck } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { formatDate, getCategoryLabel, isNew } from '@/lib/utils';
 import {
   Header,
@@ -10,6 +10,7 @@ import {
   DownloadButton,
   MarkdownPreview,
   UpvoteSection,
+  VerifiedBadge,
 } from '@/components';
 import { createClient } from '@/lib/supabase/server';
 import { getCommunityAgentBySlug } from '@/lib/supabase/community';
@@ -107,13 +108,7 @@ export default async function AgentPage({ params, searchParams }: AgentPageProps
                   {agent.name}
                 </h1>
                 {curated && (
-                  <BadgeCheck
-                    className="w-6 h-6 text-accent-hover shrink-0"
-                    strokeWidth={2.25}
-                    aria-label="Verified — maintainer-curated"
-                  >
-                    <title>Verified — maintainer-curated</title>
-                  </BadgeCheck>
+                  <VerifiedBadge className="w-6 h-6 text-accent-hover shrink-0" />
                 )}
               </div>
               <span className="inline-flex items-center h-5 px-2 text-[11px] font-medium text-text-muted bg-white/[0.04] rounded-full">

@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { BadgeCheck } from 'lucide-react';
 import { isCurated, type CommunityAgent } from '@/types/agent';
 import {
   getCategoryLabel,
@@ -13,6 +12,7 @@ import {
   agentHref,
 } from '@/lib/utils';
 import UpvoteButton from './upvote-button';
+import VerifiedBadge from './verified-badge';
 
 interface AgentCardProps {
   agent: CommunityAgent;
@@ -61,13 +61,7 @@ export default function AgentCard({
               {agent.name}
             </h3>
             {curated && (
-              <BadgeCheck
-                className="w-4 h-4 text-accent-hover shrink-0"
-                strokeWidth={2.25}
-                aria-label="Verified — maintainer-curated"
-              >
-                <title>Verified — maintainer-curated</title>
-              </BadgeCheck>
+              <VerifiedBadge className="w-4 h-4 text-accent-hover shrink-0" />
             )}
             {isNew(agent.created) && (
               <span className="inline-flex items-center h-5 px-2 text-[10px] font-medium text-text-primary bg-white/[0.08] border border-border rounded-full">
