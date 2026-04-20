@@ -2,14 +2,16 @@
 
 ## Sobre o Projeto
 
-Repositorio de custom instructions para Claude Code. Site estatico em Next.js com estetica pixel art, dark mode, paleta roxa.
+Repositorio de custom instructions para Claude Code. App Next.js dark-mode-first, com estetica inspirada no Linear.app (tipografia Inter, paleta achromatica com acento indigo, bordas semitransparentes). Fontes: agentes oficiais em arquivos `.md`, agentes da comunidade em Supabase Postgres com moderacao.
 
 ## Stack
 
 - Next.js 14 (App Router)
 - TypeScript
 - Tailwind CSS
-- gray-matter
+- gray-matter (parser de frontmatter dos oficiais)
+- Supabase (auth, DB, RLS) — autenticacao GitHub OAuth, tabelas `community_agents`, `votes`, `admins`
+- lucide-react (icones)
 - Vercel
 
 ## Estrutura
@@ -52,28 +54,44 @@ npm run lint     # linting
 - Conventional commits: feat:, fix:, docs:, style:, refactor:
 - Mensagens em portugues ou ingles (consistente)
 
-## Design Tokens
+## Design Tokens (Linear-inspired)
+
+Fonte canonica: `DESIGN.md` na raiz do repo. Resumo:
 
 ### Cores
 ```
-bg-primary:     #0D0A1A
-bg-secondary:   #1A1625
-bg-tertiary:    #252033
-text-primary:   #FFFFFF
-text-secondary: #B8B5C4
-accent-lilac:   #A78BFA
-accent-neon:    #39FF14
-border-default: #3D3654
+background-primary:    #08090a   (canvas)
+background-secondary:  #0f1011   (panel)
+background-tertiary:   #191a1b   (elevated)
+background-elevated:   #28282c   (hover surface)
+
+text-primary:          #f7f8f8   (near-white, nao usar #fff puro)
+text-secondary:        #d0d6e0
+text-muted:            #8a8f98
+text-subtle:           #62666d
+
+accent-brand:          #5e6ad2   (indigo, so CTA primario)
+accent-lilac:          #7170ff   (violet, interativo)
+accent-hover:          #828fff
+accent-neon:           #10b981   (success/status apenas)
+
+border-DEFAULT:        rgba(255,255,255,0.08)   (padrao)
+border-subtle:         rgba(255,255,255,0.05)
+border-solid:          #23252a
 ```
 
 ### Fontes
-- Titulos: 'Press Start 2P'
-- Corpo: 'JetBrains Mono'
+- UI: **Inter Variable** com `font-feature-settings: "cv01", "ss03"` globais
+- Codigo: **JetBrains Mono** (fallback pro Berkeley Mono do spec original, que e pago)
+- Pesos: **400** (leitura), **510** (UI/emphasis — peso padrao), **590** (strong)
+- Tracking negativo em displays: `tracking-display` (-0.022em) pra >32px
 
 ### Estilo Visual
-- Bordas: 2px solid, cantos retos (sem border-radius)
-- Sombras: 4px 4px 0 0 (offset solido, sem blur)
-- Hover: translateY(-2px), borda accent-neon
+- Bordas: **1px solid**, translucidas brancas (`rgba(255,255,255,0.05–0.08)`)
+- Radii: `rounded-md` (6px) botoes/inputs, `rounded-lg` (8px) cards, `rounded-full` pills
+- Superficies translucidas: `bg-white/[0.02]` (card), `bg-white/[0.04]` (hover), `bg-white/[0.05]` (active)
+- Sombras pra elevacao: `shadow-ring`, `shadow-elevated`, `shadow-focus`
+- Hover em cards: aumentar opacidade do bg, NAO usar translate ou sombra pixel
 
 ## Estrutura de um Agente (.md)
 
@@ -99,6 +117,16 @@ updated: "2025-02-03"
 - development
 - automation
 - writing
+- business
+- marketing
+
+## Fluxos Autenticados (Supabase)
+
+- **Login**: GitHub OAuth via Supabase Auth → `/auth/callback` troca code por session
+- **Upvote**: usuarios autenticados chamam RPC `cast_vote` / `remove_vote`. Dados do GitHub (id/username/avatar) sao preenchidos server-side a partir de `auth.users`, nunca do cliente
+- **Submissao**: `/submit` chama RPC `submit_community_agent` (auto-preenche autor server-side, status=pending)
+- **Moderacao**: admins (tabela `admins`) acessam `/admin`, aprovam/rejeitam via RPC `approve_community_agent` / `reject_community_agent`
+- **RLS**: todas as mutacoes passam por security-definer RPCs. Leituras usam policies (approved+not deleted publico, autor ve proprio, admin ve tudo)
 
 ## Adicionando um Novo Agente
 
@@ -119,9 +147,11 @@ updated: "2025-02-03"
 
 - `PRD.md` - Product Requirements Document
 - `CLAUDE.md` - Este arquivo (contexto para Claude)
+- `DESIGN.md` - Sistema visual completo (Linear-inspired, fonte canonica pra UI)
 - `README.md` - Documentacao publica
-- `tailwind.config.ts` - Design tokens
-- `/src/lib/agents.ts` - Parser dos arquivos .md
+- `tailwind.config.ts` - Design tokens materializados
+- `/src/lib/agents.ts` - Parser dos arquivos .md (oficiais)
+- `/src/lib/supabase/` - Clients + helpers pra auth, votes, community, moderation
 
 ## Contexto de Negocio
 
@@ -142,5 +172,10 @@ Publico-alvo: desenvolvedores e designers que usam Claude Code/Projects.
 - Dependencias desnecessarias
 - Logica complexa no frontend
 - Animacoes pesadas
-- Border-radius (manter pixel perfect)
 - Light mode (projeto e dark only)
+- Pure white (`#ffffff`) como texto — usar `text-text-primary` (`#f7f8f8`)
+- Border `2px solid` e sombras pixel (`shadow-[4px_4px_0_0_...]`) — padrao atual e `1px` translucido
+- Fonte pixel (Press Start 2P) — substituida por Inter Variable
+- Bordas opacas solidas em dark backgrounds — usar translucidas brancas
+- Peso `font-bold` (700) — maximo e `font-semibold` (590); padrao de UI e `font-medium` (510)
+- Acento indigo (`accent-brand`) decorativo — reservado pra CTAs e elementos interativos

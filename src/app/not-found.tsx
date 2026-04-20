@@ -1,5 +1,6 @@
 import Link from 'next/link';
-import { Header, Footer, ArrowLeftIcon } from '@/components';
+import { ArrowLeft } from 'lucide-react';
+import { Header, Footer } from '@/components';
 
 export default function NotFound() {
   return (
@@ -7,18 +8,18 @@ export default function NotFound() {
       <Header />
 
       <main className="flex-1 flex items-center justify-center">
-        <div className="text-center px-4">
-          <h1 className="font-pixel text-xl md:text-2xl text-text-primary mb-4">
+        <div className="text-center px-6">
+          <h1 className="text-5xl md:text-6xl font-medium text-text-primary tracking-display mb-3">
             404
           </h1>
-          <p className="text-text-secondary font-mono mb-8">
+          <p className="text-[15px] text-text-secondary mb-8">
             Agent not found.
           </p>
           <Link
             href="/"
-            className="inline-flex items-center gap-2 text-accent-lilac hover:text-accent-neon transition-colors font-mono text-sm"
+            className="inline-flex items-center gap-1.5 text-[13px] text-text-muted hover:text-text-primary transition-colors"
           >
-            <ArrowLeftIcon className="w-4 h-4" /> Back to list
+            <ArrowLeft className="w-3.5 h-3.5" /> Back to list
           </Link>
         </div>
       </main>

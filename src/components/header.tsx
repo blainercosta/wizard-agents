@@ -24,32 +24,32 @@ export default async function Header() {
     : null;
 
   return (
-    <header className="border-b-2 border-border bg-background-secondary">
-      <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-3 group">
-          <WizardLogo className="w-10 h-10" />
-          <span className="font-pixel text-xs text-text-primary group-hover:text-accent-lilac transition-colors">
-            WIZARD AGENTS
+    <header className="sticky top-0 z-40 bg-background-secondary/80 backdrop-blur border-b border-border-subtle">
+      <div className="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between">
+        <Link href="/" className="flex items-center gap-2.5 group">
+          <WizardLogo className="w-7 h-7" />
+          <span className="text-[13px] font-medium text-text-primary tracking-tight">
+            Wizard Agents
           </span>
         </Link>
 
-        <nav className="flex items-center gap-6">
+        <nav className="flex items-center gap-1">
           <Link
             href="/"
-            className="text-text-secondary hover:text-accent-lilac transition-colors text-sm font-mono"
+            className="px-3 h-8 flex items-center text-[13px] font-medium text-text-secondary hover:text-text-primary transition-colors rounded-md"
           >
             Agents
           </Link>
           <Link
             href="/submit"
-            className="text-text-secondary hover:text-accent-lilac transition-colors text-sm font-mono"
+            className="px-3 h-8 flex items-center text-[13px] font-medium text-text-secondary hover:text-text-primary transition-colors rounded-md"
           >
             Submit
           </Link>
           {isAdmin && (
             <Link
               href="/admin"
-              className="text-accent-neon hover:text-accent-lilac transition-colors text-sm font-mono"
+              className="px-3 h-8 flex items-center text-[13px] font-medium text-accent-lilac hover:text-accent-hover transition-colors rounded-md"
             >
               Admin
             </Link>
@@ -58,11 +58,13 @@ export default async function Header() {
             href="https://github.com/blainercosta"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-text-secondary hover:text-accent-lilac transition-colors text-sm font-mono hidden sm:inline"
+            className="px-3 h-8 hidden sm:flex items-center text-[13px] font-medium text-text-secondary hover:text-text-primary transition-colors rounded-md"
           >
             GitHub
           </Link>
-          <AuthButtons user={authUser} />
+          <div className="ml-2">
+            <AuthButtons user={authUser} />
+          </div>
         </nav>
       </div>
     </header>

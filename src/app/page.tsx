@@ -47,21 +47,16 @@ export default async function Home() {
       <Header />
 
       <main className="flex-1">
-        <section className="border-b border-border bg-background-secondary mb-8">
-          <div className="max-w-6xl mx-auto px-4 pt-16 pb-12">
-            <h1 className="font-pixel text-xl md:text-2xl text-text-primary mb-4 leading-relaxed">
-              WIZARD<span className="text-accent-neon">_</span>AGENTS
-            </h1>
-            <p className="text-text-secondary font-mono text-sm md:text-base max-w-xl mb-2">
-              Ready-to-use agents for Claude Code.
-            </p>
-            <p className="text-text-muted font-mono text-sm">
-              Copy. Use. Done.
-            </p>
-          </div>
+        <section className="max-w-6xl mx-auto px-6 pt-20 pb-14">
+          <h1 className="text-4xl md:text-5xl font-medium text-text-primary tracking-display leading-tight mb-5">
+            Ready-to-use agents for Claude Code
+          </h1>
+          <p className="text-lg text-text-secondary max-w-xl leading-relaxed">
+            An open-source library of prompts. Copy one in, and you are done.
+          </p>
         </section>
 
-        <section className="max-w-6xl mx-auto px-4">
+        <section className="max-w-6xl mx-auto px-6 pb-20">
           <CategoryFilter activeCategory="all" />
           <AgentGrid
             agents={listed}

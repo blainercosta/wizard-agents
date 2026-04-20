@@ -1,8 +1,9 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
+import { ArrowLeft } from 'lucide-react';
 import { getAgentBySlug, getAllSlugs } from '@/lib/agents';
 import { formatDate, getCategoryLabel, isNew } from '@/lib/utils';
-import { Header, Footer, CopyButton, DownloadButton, MarkdownPreview, ArrowLeftIcon, UpvoteSection } from '@/components';
+import { Header, Footer, CopyButton, DownloadButton, MarkdownPreview, UpvoteSection } from '@/components';
 import { createClient } from '@/lib/supabase/server';
 import {
   getVoteCountsBatch,
@@ -73,93 +74,86 @@ export default async function AgentPage({ params }: AgentPageProps) {
       <Header />
 
       <main className="flex-1">
-        <div className="max-w-4xl mx-auto px-4 py-8">
-          {/* Back button */}
+        <div className="max-w-3xl mx-auto px-6 py-12">
           <Link
             href="/"
-            className="inline-flex items-center gap-2 text-text-secondary hover:text-accent-lilac transition-colors mb-8 font-mono text-sm"
+            className="inline-flex items-center gap-1.5 text-[13px] text-text-muted hover:text-text-primary transition-colors mb-10"
           >
-            <ArrowLeftIcon className="w-4 h-4" /> Back to list
+            <ArrowLeft className="w-3.5 h-3.5" /> Back to list
           </Link>
 
-          {/* Agent Header */}
-          <div className="mb-6">
-            {/* Title + Version Badge + NEW Tag */}
-            <div className="flex flex-wrap items-center gap-4 mb-4">
-              <h1 className="font-pixel text-lg md:text-xl text-text-primary leading-relaxed">
+          <div className="mb-8">
+            <div className="flex flex-wrap items-center gap-2 mb-3">
+              <h1 className="text-3xl md:text-4xl font-medium text-text-primary tracking-display leading-tight">
                 {agent.name}
               </h1>
-              <span className="px-3 py-1 bg-background-tertiary text-text-muted text-xs font-mono">
+              <span className="inline-flex items-center h-5 px-2 text-[11px] font-medium text-text-muted bg-white/[0.04] rounded-full">
                 v{agent.version}
               </span>
               {isNew(agent.created) && (
-                <span className="px-2 py-1 bg-accent-neon text-background-primary text-xs font-mono font-bold">
-                  NEW
+                <span className="inline-flex items-center h-5 px-2 text-[10px] font-medium text-background-primary bg-accent-neon rounded-full">
+                  New
                 </span>
               )}
             </div>
 
-            {/* Description */}
-            <p className="text-base text-text-secondary font-mono mb-6">
+            <p className="text-lg text-text-secondary leading-relaxed mb-6">
               {agent.description}
             </p>
 
-            {/* Works with: Compatibility Pills */}
-            <div className="mb-3">
-              <span className="text-text-muted text-xs font-mono mr-3">Works with:</span>
-              <span className="inline-flex flex-wrap gap-2">
-                {agent.compatibility.map((item) => (
-                  <span
-                    key={item}
-                    className="px-3 py-1 bg-background-tertiary text-text-secondary text-xs font-mono"
-                  >
-                    {item}
-                  </span>
-                ))}
-              </span>
-            </div>
-
-            {/* Tags: */}
-            {agent.tags && agent.tags.length > 0 && (
-              <div className="mb-4">
-                <span className="text-text-muted text-xs font-mono mr-3">Tags:</span>
-                <span className="inline-flex flex-wrap gap-2">
-                  {agent.tags.map((tag) => (
+            <div className="flex flex-col gap-2.5 text-[13px]">
+              <div className="flex items-start gap-2 flex-wrap">
+                <span className="text-text-muted shrink-0">Works with</span>
+                <span className="inline-flex flex-wrap gap-1.5">
+                  {agent.compatibility.map((item) => (
                     <span
-                      key={tag}
-                      className="px-2 py-1 bg-transparent border border-accent-lilac text-accent-lilac text-xs font-mono"
+                      key={item}
+                      className="inline-flex items-center h-5 px-2 text-[11px] font-medium text-text-secondary bg-white/[0.04] rounded-full"
                     >
-                      {tag}
+                      {item}
                     </span>
                   ))}
                 </span>
               </div>
-            )}
 
-            {/* Category + Date */}
-            <div className="text-xs text-text-muted font-mono">
-              {getCategoryLabel(agent.category)} • Updated on {formatDate(agent.updated)}
+              {agent.tags && agent.tags.length > 0 && (
+                <div className="flex items-start gap-2 flex-wrap">
+                  <span className="text-text-muted shrink-0">Tags</span>
+                  <span className="inline-flex flex-wrap gap-1.5">
+                    {agent.tags.map((tag) => (
+                      <span
+                        key={tag}
+                        className="inline-flex items-center h-5 px-2 text-[11px] font-medium text-accent-lilac border border-accent-lilac/30 rounded-full"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </span>
+                </div>
+              )}
+
+              <div className="text-text-muted">
+                {getCategoryLabel(agent.category)} · Updated on {formatDate(agent.updated)}
+              </div>
             </div>
           </div>
 
-          {/* Action Buttons */}
-          <div className="flex flex-wrap gap-4 mt-6 mb-8">
+          <div className="flex flex-wrap gap-2 mb-10">
             <CopyButton
               content={agent.rawContent}
               label="Copy agent"
               copiedLabel="Copied"
-              className="!bg-accent-lilac !text-white !border-accent-lilac !font-bold px-6 py-3"
+              className="h-9 px-4 text-white bg-accent-brand hover:bg-accent-hover rounded-md"
             />
             <DownloadButton
               content={agent.rawContent}
               filename={`${agent.slug}.md`}
               label="Download .md"
-              className="!bg-transparent !border-2 !border-border !text-text-secondary px-6 py-3 hover:!border-accent-lilac hover:!text-accent-lilac"
+              className="h-9 px-4 text-text-secondary bg-white/[0.02] border border-border hover:bg-white/[0.05] hover:text-text-primary rounded-md"
             />
           </div>
 
-          {/* Upvote + Supporters */}
-          <div className="mb-10">
+          <div className="mb-12">
             <UpvoteSection
               targetType="official"
               targetId={agent.slug}
@@ -172,14 +166,13 @@ export default async function AgentPage({ params }: AgentPageProps) {
             />
           </div>
 
-          {/* Content Preview - Only the prompt content, not YAML frontmatter */}
-          <div className="bg-background-secondary border-2 border-border">
-            <div className="border-b-2 border-border px-6 py-3">
-              <span className="text-text-muted text-sm font-mono">
+          <div className="bg-white/[0.02] border border-border rounded-lg overflow-hidden">
+            <div className="border-b border-border-subtle px-5 py-2.5">
+              <span className="text-text-muted text-xs font-mono">
                 {agent.slug}.md
               </span>
             </div>
-            <div className="p-6 overflow-x-auto overflow-y-auto max-h-[400px]">
+            <div className="p-5 overflow-x-auto overflow-y-auto max-h-[480px]">
               <MarkdownPreview content={agent.content} />
             </div>
           </div>

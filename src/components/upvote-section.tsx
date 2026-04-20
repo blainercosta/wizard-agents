@@ -62,7 +62,7 @@ export default function UpvoteSection({
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       <div className="flex items-center gap-4 flex-wrap">
         <UpvoteButton
           targetType={targetType}
@@ -74,13 +74,13 @@ export default function UpvoteSection({
         />
 
         {isAuthenticated && initialVoted && (
-          <label className="inline-flex items-center gap-2 font-mono text-xs text-text-secondary cursor-pointer">
+          <label className="inline-flex items-center gap-2 text-[13px] text-text-secondary cursor-pointer select-none">
             <input
               type="checkbox"
               checked={isPublic}
               onChange={togglePublic}
               disabled={pending}
-              className="w-4 h-4 border-2 border-border bg-background-secondary accent-accent-neon"
+              className="w-4 h-4 rounded border border-border bg-white/[0.02] accent-accent-lilac"
             />
             Show me as supporter
           </label>
@@ -89,10 +89,10 @@ export default function UpvoteSection({
 
       {supporters.length > 0 && (
         <div>
-          <div className="text-text-muted text-xs font-mono mb-2">
+          <div className="text-text-muted text-xs mb-2">
             Supporters ({supporters.length})
           </div>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-1.5">
             {supporters.map((s) => (
               <a
                 key={s.username}
@@ -100,7 +100,7 @@ export default function UpvoteSection({
                 target="_blank"
                 rel="noopener noreferrer"
                 title={`@${s.username}`}
-                className="inline-flex items-center gap-2 border-2 border-border px-2 py-1 hover:border-accent-lilac transition-colors"
+                className="inline-flex items-center gap-1.5 h-7 pl-1 pr-2.5 rounded-full bg-white/[0.04] border border-border-subtle hover:bg-white/[0.08] transition-colors"
               >
                 {s.avatarUrl && (
                   <Image
@@ -108,10 +108,10 @@ export default function UpvoteSection({
                     alt={s.username}
                     width={20}
                     height={20}
-                    className="border border-border"
+                    className="rounded-full"
                   />
                 )}
-                <span className="font-mono text-xs text-text-secondary">
+                <span className="text-xs text-text-secondary">
                   @{s.username}
                 </span>
               </a>

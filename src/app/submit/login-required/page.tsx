@@ -10,17 +10,17 @@ export default function LoginRequiredPage() {
     <div className="min-h-screen flex flex-col bg-background-primary">
       <Header />
       <main className="flex-1 flex items-center justify-center">
-        <div className="max-w-md mx-auto px-4 py-16 text-center">
-          <h1 className="font-pixel text-base text-text-primary mb-4 leading-relaxed">
-            LOGIN_REQUIRED
+        <div className="max-w-md mx-auto px-6 py-16 text-center">
+          <h1 className="text-2xl font-medium text-text-primary tracking-tight mb-3">
+            Sign in to submit
           </h1>
-          <p className="text-text-secondary font-mono text-sm mb-8">
-            Sign in with GitHub to submit an agent. We use your GitHub profile
+          <p className="text-[15px] text-text-secondary leading-relaxed mb-8">
+            Use your GitHub account to submit an agent. Your profile is used
             for attribution only.
           </p>
           <Link
             href="/"
-            className="inline-block border-2 border-border px-4 py-2 font-mono text-sm text-text-primary hover:border-accent-neon transition-colors"
+            className="inline-flex items-center h-9 px-4 text-[13px] font-medium text-text-secondary bg-white/[0.02] border border-border rounded-md hover:bg-white/[0.05] hover:text-text-primary transition-colors"
           >
             Back to home
           </Link>

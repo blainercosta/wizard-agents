@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
+import { Github } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 
 type Props = {
@@ -36,33 +37,34 @@ export default function AuthButtons({ user }: Props) {
       <button
         onClick={handleLogin}
         disabled={loading}
-        className="border-2 border-border px-3 py-1.5 font-mono text-xs text-text-primary hover:border-accent-neon hover:-translate-y-0.5 transition-all disabled:opacity-50 disabled:cursor-wait"
+        className="inline-flex items-center gap-2 h-8 px-3 text-[13px] font-medium text-white bg-accent-brand hover:bg-accent-hover rounded-md transition-colors disabled:opacity-60 disabled:cursor-wait"
       >
-        {loading ? 'Signing in...' : 'Login with GitHub'}
+        <Github className="w-3.5 h-3.5" />
+        {loading ? 'Signing in...' : 'Sign in'}
       </button>
     );
   }
 
   return (
-    <div className="flex items-center gap-3">
+    <div className="flex items-center gap-2">
       {user.avatarUrl && (
         <Image
           src={user.avatarUrl}
           alt={user.username}
-          width={28}
-          height={28}
-          className="border-2 border-border"
+          width={24}
+          height={24}
+          className="rounded-full border border-border"
         />
       )}
-      <span className="font-mono text-xs text-text-secondary hidden sm:inline">
+      <span className="text-[13px] text-text-secondary hidden sm:inline">
         @{user.username}
       </span>
       <button
         onClick={handleLogout}
         disabled={loading}
-        className="border-2 border-border px-3 py-1.5 font-mono text-xs text-text-secondary hover:border-accent-neon hover:text-text-primary transition-all disabled:opacity-50"
+        className="inline-flex items-center h-8 px-3 text-[13px] font-medium text-text-secondary bg-white/[0.02] border border-border rounded-md hover:bg-white/[0.05] hover:text-text-primary transition-colors disabled:opacity-60"
       >
-        {loading ? '...' : 'Logout'}
+        {loading ? '...' : 'Sign out'}
       </button>
     </div>
   );

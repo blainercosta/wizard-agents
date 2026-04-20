@@ -77,38 +77,35 @@ export default function SubmissionForm() {
   const selectableCategories = CATEGORIES.filter((c) => c.value !== 'all');
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <Field label="Name" hint={slug ? `Slug: ${slug}` : undefined}>
+    <form onSubmit={handleSubmit} className="space-y-5">
+      <Field label="Name" hint={slug ? `/${slug}` : undefined}>
         <input
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="Database Expert"
           maxLength={80}
-          className="w-full bg-background-tertiary border-2 border-border px-3 py-2 font-mono text-sm text-text-primary focus:outline-none focus:border-accent-lilac"
+          className="input"
         />
       </Field>
 
-      <Field
-        label="Description"
-        hint={`${description.length}/280`}
-      >
+      <Field label="Description" hint={`${description.length}/280`}>
         <input
           type="text"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           placeholder="Short sentence describing what the agent does."
           maxLength={280}
-          className="w-full bg-background-tertiary border-2 border-border px-3 py-2 font-mono text-sm text-text-primary focus:outline-none focus:border-accent-lilac"
+          className="input"
         />
       </Field>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
         <Field label="Category">
           <select
             value={category}
             onChange={(e) => setCategory(e.target.value as Category)}
-            className="w-full bg-background-tertiary border-2 border-border px-3 py-2 font-mono text-sm text-text-primary focus:outline-none focus:border-accent-lilac"
+            className="input"
           >
             {selectableCategories.map((c) => (
               <option key={c.value} value={c.value}>
@@ -125,7 +122,7 @@ export default function SubmissionForm() {
             onChange={(e) => setVersion(e.target.value)}
             placeholder="1.0"
             maxLength={10}
-            className="w-full bg-background-tertiary border-2 border-border px-3 py-2 font-mono text-sm text-text-primary focus:outline-none focus:border-accent-lilac"
+            className="input"
           />
         </Field>
       </div>
@@ -136,14 +133,14 @@ export default function SubmissionForm() {
           value={tagsInput}
           onChange={(e) => setTagsInput(e.target.value)}
           placeholder="postgres, sql, migration"
-          className="w-full bg-background-tertiary border-2 border-border px-3 py-2 font-mono text-sm text-text-primary focus:outline-none focus:border-accent-lilac"
+          className="input"
         />
         {tags.length > 0 && (
-          <div className="flex flex-wrap gap-2 mt-2">
+          <div className="flex flex-wrap gap-1.5 mt-2">
             {tags.slice(0, 8).map((tag) => (
               <span
                 key={tag}
-                className="px-2 py-1 border border-accent-lilac text-accent-lilac text-xs font-mono"
+                className="inline-flex items-center h-5 px-2 text-[11px] font-medium text-text-secondary bg-white/[0.04] rounded-full"
               >
                 {tag}
               </span>
@@ -154,35 +151,56 @@ export default function SubmissionForm() {
 
       <Field
         label="Prompt content"
-        hint="Markdown. Do NOT include YAML frontmatter (---) — we add that on output."
+        hint="Markdown. Do not include YAML frontmatter — it is generated on output."
       >
         <textarea
           value={content}
           onChange={(e) => setContent(e.target.value)}
-          placeholder="# Database Expert&#10;&#10;You are a senior database engineer..."
+          placeholder={`# Database Expert\n\nYou are a senior database engineer...`}
           rows={16}
-          className="w-full bg-background-tertiary border-2 border-border px-3 py-2 font-mono text-xs text-text-primary focus:outline-none focus:border-accent-lilac"
+          className="input font-mono text-xs"
         />
       </Field>
 
       {error && (
-        <div className="border-2 border-red-500 bg-red-500/10 text-red-400 px-4 py-3 font-mono text-sm">
+        <div className="text-sm text-red-400 bg-red-500/10 border border-red-500/30 rounded-md px-3 py-2">
           {error}
         </div>
       )}
 
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-4 pt-2">
         <button
           type="submit"
           disabled={pending}
-          className="px-6 py-3 bg-accent-lilac text-white font-bold font-mono text-sm hover:opacity-90 disabled:opacity-50 transition-all"
+          className="inline-flex items-center h-9 px-4 text-[13px] font-medium text-white bg-accent-brand hover:bg-accent-hover rounded-md transition-colors disabled:opacity-60"
         >
           {pending ? 'Submitting...' : 'Submit for review'}
         </button>
-        <p className="text-text-muted font-mono text-xs">
+        <p className="text-text-muted text-xs">
           Your agent will be reviewed before appearing publicly.
         </p>
       </div>
+
+      <style jsx>{`
+        :global(.input) {
+          width: 100%;
+          background: rgba(255, 255, 255, 0.02);
+          border: 1px solid rgba(255, 255, 255, 0.08);
+          border-radius: 6px;
+          padding: 8px 12px;
+          font-size: 13px;
+          color: #f7f8f8;
+          outline: none;
+          transition: border-color 0.15s, box-shadow 0.15s;
+        }
+        :global(.input::placeholder) {
+          color: #62666d;
+        }
+        :global(.input:focus) {
+          border-color: #7170ff;
+          box-shadow: 0 0 0 1px rgba(113, 112, 255, 0.25);
+        }
+      `}</style>
     </form>
   );
 }
@@ -198,9 +216,9 @@ function Field({
 }) {
   return (
     <div>
-      <div className="flex items-baseline justify-between mb-2">
-        <label className="font-mono text-xs text-text-primary">{label}</label>
-        {hint && <span className="font-mono text-xs text-text-muted">{hint}</span>}
+      <div className="flex items-baseline justify-between mb-1.5">
+        <label className="text-[13px] font-medium text-text-primary">{label}</label>
+        {hint && <span className="text-xs text-text-muted">{hint}</span>}
       </div>
       {children}
     </div>

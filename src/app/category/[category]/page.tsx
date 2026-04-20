@@ -93,30 +93,27 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
       <Header />
 
       <main className="flex-1">
-        <section className="border-b border-border bg-background-secondary mb-8">
-          <div className="max-w-6xl mx-auto px-4 pt-16 pb-12">
-            <nav className="flex items-center gap-2 text-sm font-mono mb-4">
-              <Link
-                href="/"
-                className="text-text-muted hover:text-accent-lilac transition-colors"
-              >
-                Home
-              </Link>
-              <span className="text-text-muted">/</span>
-              <span className="text-accent-lilac">{categoryLabel}</span>
-            </nav>
+        <section className="max-w-6xl mx-auto px-6 pt-16 pb-10">
+          <nav className="flex items-center gap-2 text-[13px] mb-4">
+            <Link
+              href="/"
+              className="text-text-muted hover:text-text-primary transition-colors"
+            >
+              Home
+            </Link>
+            <span className="text-text-subtle">/</span>
+            <span className="text-text-secondary">{categoryLabel}</span>
+          </nav>
 
-            <h1 className="font-pixel text-xl md:text-2xl text-text-primary mb-4 leading-relaxed">
-              {categoryLabel.toUpperCase()}
-              <span className="text-accent-neon">_</span>AGENTS
-            </h1>
-            <p className="text-text-secondary font-mono text-sm md:text-base max-w-xl">
-              {listed.length} agent{listed.length !== 1 ? 's' : ''} in this category.
-            </p>
-          </div>
+          <h1 className="text-3xl md:text-4xl font-medium text-text-primary tracking-display leading-tight mb-3">
+            {categoryLabel}
+          </h1>
+          <p className="text-[15px] text-text-muted">
+            {listed.length} agent{listed.length !== 1 ? 's' : ''} in this category
+          </p>
         </section>
 
-        <section className="max-w-6xl mx-auto px-4">
+        <section className="max-w-6xl mx-auto px-6 pb-20">
           <CategoryFilter activeCategory={category} />
           <AgentGrid
             agents={listed}

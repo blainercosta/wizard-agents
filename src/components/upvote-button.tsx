@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useTransition } from 'react';
+import { ChevronUp } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 
 type Props = {
@@ -67,8 +68,8 @@ export default function UpvoteButton({
     });
   }
 
-  const padding = size === 'md' ? 'px-4 py-2' : 'px-3 py-1.5';
-  const textSize = size === 'md' ? 'text-sm' : 'text-xs';
+  const dims = size === 'md' ? 'h-9 px-3 text-sm gap-2' : 'h-7 px-2 text-xs gap-1.5';
+  const iconSize = size === 'md' ? 'w-4 h-4' : 'w-3.5 h-3.5';
 
   return (
     <button
@@ -76,14 +77,14 @@ export default function UpvoteButton({
       disabled={pending}
       aria-pressed={voted}
       aria-label={voted ? 'Remove upvote' : 'Upvote'}
-      className={`inline-flex items-center gap-2 border-2 ${padding} ${textSize} font-mono font-bold transition-all disabled:opacity-70 ${
+      className={`inline-flex items-center ${dims} font-medium rounded-md border transition-colors disabled:opacity-60 ${
         voted
-          ? 'bg-accent-neon text-background-primary border-accent-neon'
-          : 'bg-transparent text-text-secondary border-border hover:border-accent-neon hover:text-text-primary'
+          ? 'bg-accent-brand/15 border-accent-brand/40 text-accent-hover'
+          : 'bg-white/[0.02] border-border text-text-secondary hover:bg-white/[0.05] hover:text-text-primary'
       }`}
     >
-      <span aria-hidden>{voted ? '▲' : '△'}</span>
-      <span>{count}</span>
+      <ChevronUp className={iconSize} strokeWidth={2.5} />
+      <span className="tabular-nums">{count}</span>
     </button>
   );
 }

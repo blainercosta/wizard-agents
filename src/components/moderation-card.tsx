@@ -54,21 +54,21 @@ export default function ModerationCard({ agent }: Props) {
   }
 
   return (
-    <article className="border-2 border-border bg-background-secondary p-6">
+    <article className="bg-white/[0.02] border border-border rounded-lg p-5">
       <div className="flex items-start justify-between gap-4 mb-4 flex-wrap">
-        <div>
-          <div className="flex items-center gap-3 mb-1 flex-wrap">
-            <h3 className="font-mono text-base text-text-primary font-bold">
+        <div className="min-w-0">
+          <div className="flex items-center gap-2 mb-1 flex-wrap">
+            <h3 className="text-[15px] font-semibold text-text-primary tracking-tight">
               {agent.name}
             </h3>
-            <span className="px-2 py-0.5 bg-background-tertiary text-text-muted text-xs font-mono">
+            <span className="inline-flex items-center h-5 px-2 text-[11px] font-medium text-text-muted bg-white/[0.04] rounded-full">
               v{agent.version}
             </span>
-            <span className="px-2 py-0.5 border border-accent-lilac text-accent-lilac text-[10px] font-mono font-bold">
-              {getCategoryLabel(agent.category).toUpperCase()}
+            <span className="inline-flex items-center h-5 px-2 text-[10px] font-medium text-accent-lilac border border-accent-lilac/40 rounded-full">
+              {getCategoryLabel(agent.category)}
             </span>
           </div>
-          <div className="text-xs text-text-muted font-mono">
+          <div className="text-xs text-text-muted">
             /{agent.slug} · submitted {formatDate(agent.created)}
           </div>
         </div>
@@ -76,33 +76,33 @@ export default function ModerationCard({ agent }: Props) {
           href={`https://github.com/${agent.author.username}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 border border-border px-2 py-1 hover:border-accent-lilac transition-colors"
+          className="inline-flex items-center gap-1.5 h-7 pl-1 pr-2.5 rounded-full bg-white/[0.04] border border-border-subtle hover:bg-white/[0.08] transition-colors"
         >
           {agent.author.avatarUrl && (
             <Image
               src={agent.author.avatarUrl}
               alt={agent.author.username}
-              width={18}
-              height={18}
-              className="border border-border"
+              width={20}
+              height={20}
+              className="rounded-full"
             />
           )}
-          <span className="font-mono text-xs text-text-secondary">
+          <span className="text-xs text-text-secondary">
             @{agent.author.username}
           </span>
         </a>
       </div>
 
-      <p className="text-sm font-mono text-text-secondary mb-4">
+      <p className="text-[13px] leading-relaxed text-text-secondary mb-4">
         {agent.description}
       </p>
 
       {agent.tags.length > 0 && (
-        <div className="flex flex-wrap gap-2 mb-4">
+        <div className="flex flex-wrap gap-1.5 mb-4">
           {agent.tags.map((t) => (
             <span
               key={t}
-              className="px-2 py-1 border border-accent-lilac text-accent-lilac text-xs font-mono"
+              className="inline-flex items-center h-5 px-2 text-[11px] font-medium text-text-secondary bg-white/[0.04] rounded-full"
             >
               {t}
             </span>
@@ -110,8 +110,8 @@ export default function ModerationCard({ agent }: Props) {
         </div>
       )}
 
-      <div className="border-2 border-border bg-background-primary mb-4 max-h-[300px] overflow-y-auto">
-        <div className="border-b-2 border-border px-4 py-2">
+      <div className="bg-background-primary border border-border-subtle rounded-md mb-4 max-h-[280px] overflow-y-auto">
+        <div className="sticky top-0 bg-background-primary/95 backdrop-blur border-b border-border-subtle px-4 py-2">
           <span className="text-text-muted text-xs font-mono">
             {agent.slug}.md
           </span>
@@ -122,7 +122,7 @@ export default function ModerationCard({ agent }: Props) {
       </div>
 
       {error && (
-        <div className="border-2 border-red-500 bg-red-500/10 text-red-400 px-3 py-2 font-mono text-xs mb-4">
+        <div className="text-sm text-red-400 bg-red-500/10 border border-red-500/30 rounded-md px-3 py-2 mb-3">
           {error}
         </div>
       )}
@@ -134,13 +134,13 @@ export default function ModerationCard({ agent }: Props) {
             onChange={(e) => setReason(e.target.value)}
             placeholder="Reason for rejection (shown to author)"
             rows={3}
-            className="w-full bg-background-tertiary border-2 border-border px-3 py-2 font-mono text-sm text-text-primary focus:outline-none focus:border-accent-lilac"
+            className="w-full bg-white/[0.02] border border-border rounded-md px-3 py-2 text-[13px] text-text-primary placeholder:text-text-subtle focus:outline-none focus:border-accent-lilac"
           />
-          <div className="flex gap-3">
+          <div className="flex gap-2">
             <button
               onClick={handleReject}
               disabled={pending}
-              className="px-4 py-2 bg-red-500 text-white font-mono font-bold text-xs hover:opacity-90 disabled:opacity-50 transition-opacity"
+              className="inline-flex items-center h-8 px-3 text-[13px] font-medium text-white bg-red-500 hover:bg-red-600 rounded-md transition-colors disabled:opacity-60"
             >
               {pending ? 'Rejecting...' : 'Confirm reject'}
             </button>
@@ -150,25 +150,25 @@ export default function ModerationCard({ agent }: Props) {
                 setReason('');
                 setError(null);
               }}
-              className="px-4 py-2 border-2 border-border text-text-secondary font-mono text-xs hover:border-accent-neon transition-colors"
+              className="inline-flex items-center h-8 px-3 text-[13px] font-medium text-text-secondary bg-white/[0.02] border border-border rounded-md hover:bg-white/[0.05] hover:text-text-primary transition-colors"
             >
               Cancel
             </button>
           </div>
         </div>
       ) : (
-        <div className="flex gap-3 flex-wrap">
+        <div className="flex gap-2 flex-wrap">
           <button
             onClick={handleApprove}
             disabled={pending}
-            className="px-4 py-2 bg-accent-neon text-background-primary font-mono font-bold text-xs hover:opacity-90 disabled:opacity-50 transition-opacity"
+            className="inline-flex items-center h-8 px-3 text-[13px] font-medium text-white bg-accent-brand hover:bg-accent-hover rounded-md transition-colors disabled:opacity-60"
           >
             {pending ? 'Approving...' : 'Approve'}
           </button>
           <button
             onClick={() => setShowReject(true)}
             disabled={pending}
-            className="px-4 py-2 border-2 border-border text-text-secondary font-mono text-xs hover:border-red-500 hover:text-red-400 transition-colors"
+            className="inline-flex items-center h-8 px-3 text-[13px] font-medium text-text-secondary bg-white/[0.02] border border-border rounded-md hover:border-red-500/40 hover:text-red-400 transition-colors"
           >
             Reject
           </button>
