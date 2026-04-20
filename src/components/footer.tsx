@@ -10,7 +10,7 @@ export default function Footer() {
               href="https://github.com/blainercosta"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-text-secondary hover:text-text-primary transition-colors"
+              className="text-text-secondary hover:text-text-primary underline underline-offset-2 decoration-border-subtle hover:decoration-text-muted transition-colors"
             >
               @blainercosta
             </a>
@@ -20,7 +20,7 @@ export default function Footer() {
               href="https://github.com/blainercosta/repo-wizard"
               target="_blank"
               rel="noopener noreferrer"
-              className="hover:text-text-primary transition-colors"
+              className="hover:text-text-primary underline underline-offset-2 decoration-border-subtle hover:decoration-text-muted transition-colors"
             >
               GitHub
             </a>

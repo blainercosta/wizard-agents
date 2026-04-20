@@ -101,7 +101,7 @@ function SubmissionItem({ submission: s }: { submission: CommunityAgent }) {
     s.status === 'approved' ? (
       <Link
         href={`/agent/${s.slug}`}
-        className="text-[15px] font-semibold text-text-primary tracking-tight hover:text-accent-lilac transition-colors"
+        className="text-[15px] font-semibold text-text-primary tracking-tight hover:text-accent-lilac underline underline-offset-2 decoration-border-subtle hover:decoration-accent-lilac/60 transition-colors"
       >
         {s.name}
       </Link>
