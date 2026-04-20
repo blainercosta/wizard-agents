@@ -3,9 +3,17 @@ import AgentCard from './agent-card';
 
 interface AgentGridProps {
   agents: AgentCardType[];
+  voteCounts: Map<string, number>;
+  votedSet: Set<string>;
+  isAuthenticated: boolean;
 }
 
-export default function AgentGrid({ agents }: AgentGridProps) {
+export default function AgentGrid({
+  agents,
+  voteCounts,
+  votedSet,
+  isAuthenticated,
+}: AgentGridProps) {
   if (agents.length === 0) {
     return (
       <div className="text-center py-12">
@@ -21,9 +29,18 @@ export default function AgentGrid({ agents }: AgentGridProps) {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {agents.map((agent) => (
-        <AgentCard key={agent.slug} agent={agent} />
-      ))}
+      {agents.map((agent) => {
+        const key = `official:${agent.slug}`;
+        return (
+          <AgentCard
+            key={agent.slug}
+            agent={agent}
+            voteCount={voteCounts.get(key) ?? 0}
+            hasVoted={votedSet.has(key)}
+            isAuthenticated={isAuthenticated}
+          />
+        );
+      })}
     </div>
   );
 }

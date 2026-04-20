@@ -4,6 +4,12 @@ import { getAgentsByCategory } from '@/lib/agents';
 import { getCategoryLabel } from '@/lib/utils';
 import { Category } from '@/types/agent';
 import { Header, Footer, AgentGrid, CategoryFilter } from '@/components';
+import { createClient } from '@/lib/supabase/server';
+import {
+  getVoteCountsBatch,
+  getUserVotedSet,
+  type VoteTarget,
+} from '@/lib/supabase/votes';
 
 interface CategoryPageProps {
   params: {
@@ -32,7 +38,7 @@ export async function generateMetadata({ params }: CategoryPageProps) {
   };
 }
 
-export default function CategoryPage({ params }: CategoryPageProps) {
+export default async function CategoryPage({ params }: CategoryPageProps) {
   const category = params.category as Category;
 
   if (!validCategories.includes(category)) {
@@ -41,6 +47,19 @@ export default function CategoryPage({ params }: CategoryPageProps) {
 
   const agents = getAgentsByCategory(category);
   const categoryLabel = getCategoryLabel(category);
+
+  const supabase = createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const targets: VoteTarget[] = agents.map((a) => ({
+    type: 'official',
+    id: a.slug,
+  }));
+  const [voteCounts, votedSet] = await Promise.all([
+    getVoteCountsBatch(supabase, targets),
+    user ? getUserVotedSet(supabase, user.id, targets) : Promise.resolve(new Set<string>()),
+  ]);
 
   return (
     <div className="min-h-screen flex flex-col bg-background-primary">
@@ -75,7 +94,12 @@ export default function CategoryPage({ params }: CategoryPageProps) {
         {/* Agents Section */}
         <section className="max-w-6xl mx-auto px-4">
           <CategoryFilter activeCategory={category} />
-          <AgentGrid agents={agents} />
+          <AgentGrid
+            agents={agents}
+            voteCounts={voteCounts}
+            votedSet={votedSet}
+            isAuthenticated={!!user}
+          />
         </section>
       </main>
 

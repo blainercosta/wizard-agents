@@ -2,7 +2,13 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { getAgentBySlug, getAllSlugs } from '@/lib/agents';
 import { formatDate, getCategoryLabel, isNew } from '@/lib/utils';
-import { Header, Footer, CopyButton, DownloadButton, MarkdownPreview, ArrowLeftIcon } from '@/components';
+import { Header, Footer, CopyButton, DownloadButton, MarkdownPreview, ArrowLeftIcon, UpvoteSection } from '@/components';
+import { createClient } from '@/lib/supabase/server';
+import {
+  getVoteCountsBatch,
+  getUserVoteState,
+  getPublicSupporters,
+} from '@/lib/supabase/votes';
 
 interface AgentPageProps {
   params: {
@@ -30,12 +36,37 @@ export async function generateMetadata({ params }: AgentPageProps) {
   };
 }
 
-export default function AgentPage({ params }: AgentPageProps) {
+export default async function AgentPage({ params }: AgentPageProps) {
   const agent = getAgentBySlug(params.slug);
 
   if (!agent) {
     notFound();
   }
+
+  const supabase = createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const target = { type: 'official' as const, id: agent.slug };
+  const [countsMap, voteState, supporters] = await Promise.all([
+    getVoteCountsBatch(supabase, [target]),
+    user
+      ? getUserVoteState(supabase, user.id, target)
+      : Promise.resolve({ voted: false, isPublic: false }),
+    getPublicSupporters(supabase, target),
+  ]);
+  const voteCount = countsMap.get(`official:${agent.slug}`) ?? 0;
+
+  const currentUser = user
+    ? {
+        username:
+          (user.user_metadata?.user_name as string | undefined) ??
+          (user.user_metadata?.preferred_username as string | undefined) ??
+          'user',
+        avatarUrl: (user.user_metadata?.avatar_url as string | undefined) ?? null,
+      }
+    : null;
 
   return (
     <div className="min-h-screen flex flex-col bg-background-primary">
@@ -112,7 +143,7 @@ export default function AgentPage({ params }: AgentPageProps) {
           </div>
 
           {/* Action Buttons */}
-          <div className="flex flex-wrap gap-4 mt-6 mb-10">
+          <div className="flex flex-wrap gap-4 mt-6 mb-8">
             <CopyButton
               content={agent.rawContent}
               label="Copy agent"
@@ -124,6 +155,20 @@ export default function AgentPage({ params }: AgentPageProps) {
               filename={`${agent.slug}.md`}
               label="Download .md"
               className="!bg-transparent !border-2 !border-border !text-text-secondary px-6 py-3 hover:!border-accent-lilac hover:!text-accent-lilac"
+            />
+          </div>
+
+          {/* Upvote + Supporters */}
+          <div className="mb-10">
+            <UpvoteSection
+              targetType="official"
+              targetId={agent.slug}
+              initialCount={voteCount}
+              initialVoted={voteState.voted}
+              initialIsPublic={voteState.isPublic}
+              isAuthenticated={!!user}
+              initialSupporters={supporters}
+              currentUser={currentUser}
             />
           </div>
 

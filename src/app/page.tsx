@@ -1,8 +1,30 @@
 import { getAllAgents } from '@/lib/agents';
 import { Header, Footer, AgentGrid, CategoryFilter } from '@/components';
+import { createClient } from '@/lib/supabase/server';
+import {
+  getVoteCountsBatch,
+  getUserVotedSet,
+  type VoteTarget,
+} from '@/lib/supabase/votes';
 
-export default function Home() {
+export default async function Home() {
   const agents = getAllAgents();
+  const supabase = createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const targets: VoteTarget[] = agents.map((a) => ({
+    type: 'official',
+    id: a.slug,
+  }));
+
+  const [voteCounts, votedSet] = await Promise.all([
+    getVoteCountsBatch(supabase, targets),
+    user
+      ? getUserVotedSet(supabase, user.id, targets)
+      : Promise.resolve(new Set<string>()),
+  ]);
 
   return (
     <div className="min-h-screen flex flex-col bg-background-primary">
@@ -27,7 +49,12 @@ export default function Home() {
         {/* Agents Section */}
         <section className="max-w-6xl mx-auto px-4">
           <CategoryFilter activeCategory="all" />
-          <AgentGrid agents={agents} />
+          <AgentGrid
+            agents={agents}
+            voteCounts={voteCounts}
+            votedSet={votedSet}
+            isAuthenticated={!!user}
+          />
         </section>
       </main>
 
