@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, BadgeCheck } from 'lucide-react';
 import { formatDate, getCategoryLabel, isNew } from '@/lib/utils';
 import {
   Header,
@@ -84,7 +84,8 @@ export default async function AgentPage({ params, searchParams }: AgentPageProps
     ? `Back to ${getCategoryLabel(fromCategory)}`
     : 'All agents';
 
-  const showAuthor = !isCurated(agent);
+  const curated = isCurated(agent);
+  const showAuthor = !curated;
 
   return (
     <div className="min-h-screen flex flex-col bg-background-primary">
@@ -101,9 +102,20 @@ export default async function AgentPage({ params, searchParams }: AgentPageProps
 
           <div className="mb-8">
             <div className="flex flex-wrap items-center gap-2 mb-3">
-              <h1 className="text-3xl md:text-4xl font-medium text-text-primary tracking-display leading-tight">
-                {agent.name}
-              </h1>
+              <div className="flex items-center gap-2">
+                <h1 className="text-3xl md:text-4xl font-medium text-text-primary tracking-display leading-tight">
+                  {agent.name}
+                </h1>
+                {curated && (
+                  <BadgeCheck
+                    className="w-6 h-6 text-accent-hover shrink-0"
+                    strokeWidth={2.25}
+                    aria-label="Verified — maintainer-curated"
+                  >
+                    <title>Verified — maintainer-curated</title>
+                  </BadgeCheck>
+                )}
+              </div>
               <span className="inline-flex items-center h-5 px-2 text-[11px] font-medium text-text-muted bg-white/[0.04] rounded-full">
                 v{agent.version}
               </span>
