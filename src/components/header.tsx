@@ -1,7 +1,24 @@
 import Link from 'next/link';
 import WizardLogo from './wizard-logo';
+import AuthButtons from './auth-buttons';
+import { createClient } from '@/lib/supabase/server';
 
-export default function Header() {
+export default async function Header() {
+  const supabase = createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const authUser = user
+    ? {
+        username:
+          (user.user_metadata?.user_name as string | undefined) ??
+          (user.user_metadata?.preferred_username as string | undefined) ??
+          'user',
+        avatarUrl: (user.user_metadata?.avatar_url as string | undefined) ?? null,
+      }
+    : null;
+
   return (
     <header className="border-b-2 border-border bg-background-secondary">
       <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
@@ -27,6 +44,7 @@ export default function Header() {
           >
             GitHub
           </Link>
+          <AuthButtons user={authUser} />
         </nav>
       </div>
     </header>
