@@ -19,3 +19,5 @@ export { default as VerifiedBadge } from './verified-badge';
 export { default as BookmarkButton } from './bookmark-button';
 export { default as SignInPopover } from './sign-in-popover';
 export { default as SignInWithGithubButton } from './sign-in-github-button';
+export { default as CommentThread } from './comment-thread';
+export { default as VersionHistory } from './version-history';
