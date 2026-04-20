@@ -33,7 +33,8 @@ export default function Home({
       <main className="flex-1">
         <section className="max-w-6xl mx-auto px-6 pt-20 pb-14">
           <h1 className="text-4xl md:text-5xl font-medium text-text-primary tracking-display leading-tight mb-5">
-            Prompts for Claude Code that people actually use.
+            <span className="block">Prompts for Claude Code</span>
+            <span className="block">that people actually use.</span>
           </h1>
           <p className="text-lg text-text-secondary max-w-xl leading-relaxed mb-8">
             Copy one in. Submit yours. Let upvotes settle the rest.
