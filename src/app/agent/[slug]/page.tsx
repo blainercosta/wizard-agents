@@ -86,7 +86,6 @@ export default async function AgentPage({ params, searchParams }: AgentPageProps
     : 'All agents';
 
   const curated = isCurated(agent);
-  const showAuthor = !curated;
 
   return (
     <div className="min-h-screen flex flex-col bg-background-primary">
@@ -114,7 +113,7 @@ export default async function AgentPage({ params, searchParams }: AgentPageProps
               <span className="inline-flex items-center h-5 px-2 text-[11px] font-medium text-text-muted bg-white/[0.04] rounded-full">
                 v{agent.version}
               </span>
-              {showAuthor && (
+              {!curated && (
                 <span className="inline-flex items-center h-5 px-2 text-[10px] font-medium text-accent-lilac border border-accent-lilac/40 rounded-full">
                   Community
                 </span>
@@ -131,30 +130,31 @@ export default async function AgentPage({ params, searchParams }: AgentPageProps
             </p>
 
             <div className="flex flex-col gap-2.5 text-[13px]">
-              {showAuthor && (
-                <div className="flex items-center gap-2">
-                  <span className="text-text-muted shrink-0">By</span>
-                  <a
-                    href={`https://github.com/${agent.author.username}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 h-6 pl-0.5 pr-2 rounded-full bg-white/[0.04] border border-border-subtle hover:bg-white/[0.08] transition-colors"
-                  >
-                    {agent.author.avatarUrl && (
-                      <Image
-                        src={agent.author.avatarUrl}
-                        alt={agent.author.username}
-                        width={18}
-                        height={18}
-                        className="rounded-full"
-                      />
-                    )}
-                    <span className="text-xs text-text-secondary">
-                      @{agent.author.username}
-                    </span>
-                  </a>
-                </div>
-              )}
+              <div className="flex items-center gap-2">
+                <span className="text-text-muted shrink-0">By</span>
+                <a
+                  href={`https://github.com/${agent.author.username}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 h-6 pl-0.5 pr-2 rounded-full bg-white/[0.04] border border-border-subtle hover:bg-white/[0.08] transition-colors"
+                >
+                  {agent.author.avatarUrl && (
+                    <Image
+                      src={agent.author.avatarUrl}
+                      alt={agent.author.username}
+                      width={18}
+                      height={18}
+                      className="rounded-full"
+                    />
+                  )}
+                  <span className="text-xs text-text-secondary">
+                    @{agent.author.username}
+                  </span>
+                  {curated && (
+                    <VerifiedBadge className="w-3.5 h-3.5 text-accent-hover shrink-0" />
+                  )}
+                </a>
+              </div>
 
               {agent.tags && agent.tags.length > 0 && (
                 <div className="flex items-start gap-2 flex-wrap">
