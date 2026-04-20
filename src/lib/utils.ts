@@ -1,4 +1,5 @@
-import { Category, CATEGORY_LABELS } from '@/types/agent';
+import { Category, CATEGORY_LABELS, type CommunityAgent } from '@/types/agent';
+import type { SortKey } from '@/components/sort-control';
 
 export function formatDate(dateString: string): string {
   const date = new Date(dateString);
@@ -49,32 +50,20 @@ export function slugify(text: string): string {
     .replace(/(^-|-$)/g, '');
 }
 
-import type { ListedAgent } from '@/types/agent';
-import type { SortKey } from '@/components/sort-control';
-
-export function agentHref(agent: ListedAgent, fromCategory?: string): string {
-  const base =
-    agent.source === 'community'
-      ? `/community/${agent.slug}`
-      : `/agent/${agent.slug}`;
+export function agentHref(agent: CommunityAgent, fromCategory?: string): string {
+  const base = `/agent/${agent.slug}`;
   return fromCategory ? `${base}?from=${fromCategory}` : base;
 }
 
-export function agentVoteTargetId(agent: ListedAgent): string {
-  return agent.source === 'community' ? agent.id : agent.slug;
-}
-
 export function sortAgents(
-  agents: ListedAgent[],
+  agents: CommunityAgent[],
   sort: SortKey,
   voteCounts?: Map<string, number>
-): ListedAgent[] {
+): CommunityAgent[] {
   const copy = [...agents];
   if (sort === 'top' && voteCounts) {
     copy.sort((a, b) => {
-      const ka = `${a.source}:${agentVoteTargetId(a)}`;
-      const kb = `${b.source}:${agentVoteTargetId(b)}`;
-      const diff = (voteCounts.get(kb) ?? 0) - (voteCounts.get(ka) ?? 0);
+      const diff = (voteCounts.get(b.id) ?? 0) - (voteCounts.get(a.id) ?? 0);
       if (diff !== 0) return diff;
       return new Date(b.updated).getTime() - new Date(a.updated).getTime();
     });

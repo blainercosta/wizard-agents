@@ -3,19 +3,18 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import type { ListedAgent } from '@/types/agent';
+import { isCurated, type CommunityAgent } from '@/types/agent';
 import {
   getCategoryLabel,
   copyToClipboard,
   downloadFile,
   isNew,
   agentHref,
-  agentVoteTargetId,
 } from '@/lib/utils';
 import UpvoteButton from './upvote-button';
 
 interface AgentCardProps {
-  agent: ListedAgent;
+  agent: CommunityAgent;
   voteCount: number;
   hasVoted: boolean;
   isAuthenticated: boolean;
@@ -49,7 +48,7 @@ export default function AgentCard({
 
   const tags = agent.tags ?? [];
   const hiddenTags = tags.length > 3 ? tags.slice(3) : [];
-  const author = agent.source === 'community' ? agent.author : null;
+  const showAuthor = !isCurated(agent);
 
   return (
     <Link href={agentHref(agent, fromCategory)} className="block group">
@@ -64,15 +63,14 @@ export default function AgentCard({
                 New
               </span>
             )}
-            {agent.source === 'community' && (
+            {showAuthor && (
               <span className="inline-flex items-center h-5 px-2 text-[10px] font-medium text-accent-lilac border border-accent-lilac/40 rounded-full">
                 Community
               </span>
             )}
           </div>
           <UpvoteButton
-            targetType={agent.source}
-            targetId={agentVoteTargetId(agent)}
+            targetId={agent.id}
             initialCount={voteCount}
             initialVoted={hasVoted}
             isAuthenticated={isAuthenticated}
@@ -87,19 +85,19 @@ export default function AgentCard({
           {agent.description}
         </p>
 
-        {author && (
+        {showAuthor && (
           <div className="flex items-center gap-2 mb-3">
-            {author.avatarUrl && (
+            {agent.author.avatarUrl && (
               <Image
-                src={author.avatarUrl}
-                alt={author.username}
+                src={agent.author.avatarUrl}
+                alt={agent.author.username}
                 width={16}
                 height={16}
                 className="rounded-full border border-border"
               />
             )}
             <span className="text-xs text-text-muted">
-              by @{author.username}
+              by @{agent.author.username}
             </span>
           </div>
         )}

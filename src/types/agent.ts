@@ -1,27 +1,5 @@
 export type Category = 'design' | 'development' | 'automation' | 'writing' | 'business' | 'marketing';
 
-export interface AgentFrontmatter {
-  name: string;
-  slug: string;
-  category: Category;
-  version: string;
-  compatibility: string[];
-  description: string;
-  tags?: string[];
-  created: string;
-  updated: string;
-}
-
-export interface Agent extends AgentFrontmatter {
-  content: string;
-  rawContent: string;
-}
-
-// AgentCard includes frontmatter + rawContent for copy/download functionality
-export interface AgentCard extends AgentFrontmatter {
-  rawContent: string;
-}
-
 export interface CommunityAuthor {
   username: string;
   avatarUrl: string | null;
@@ -44,9 +22,13 @@ export interface CommunityAgent {
   author: CommunityAuthor;
 }
 
-export type ListedAgent =
-  | ({ source: 'official' } & AgentCard)
-  | ({ source: 'community' } & CommunityAgent);
+// GitHub usernames whose agents are treated as curated (no Community badge,
+// no author attribution shown). Add additional maintainers here.
+export const CURATOR_USERNAMES = new Set(['blainercosta']);
+
+export function isCurated(agent: CommunityAgent): boolean {
+  return CURATOR_USERNAMES.has(agent.author.username);
+}
 
 export const CATEGORIES: { value: Category | 'all'; label: string }[] = [
   { value: 'all', label: 'All' },

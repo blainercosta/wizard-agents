@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react';
 import Image from 'next/image';
 import { createClient } from '@/lib/supabase/client';
+import { VOTE_TARGET_TYPE } from '@/lib/supabase/votes';
 import UpvoteButton from './upvote-button';
 
 type Supporter = {
@@ -11,7 +12,6 @@ type Supporter = {
 };
 
 type Props = {
-  targetType: 'official' | 'community';
   targetId: string;
   initialCount: number;
   initialVoted: boolean;
@@ -22,7 +22,6 @@ type Props = {
 };
 
 export default function UpvoteSection({
-  targetType,
   targetId,
   initialCount,
   initialVoted,
@@ -49,7 +48,7 @@ export default function UpvoteSection({
 
     startTransition(async () => {
       const { error } = await supabase.rpc('cast_vote', {
-        p_target_type: targetType,
+        p_target_type: VOTE_TARGET_TYPE,
         p_target_id: targetId,
         p_is_public: next,
       });
@@ -65,7 +64,6 @@ export default function UpvoteSection({
     <div className="space-y-5">
       <div className="flex items-center gap-4 flex-wrap">
         <UpvoteButton
-          targetType={targetType}
           targetId={targetId}
           initialCount={initialCount}
           initialVoted={initialVoted}

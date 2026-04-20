@@ -1,25 +1,18 @@
-import { getAllAgents } from '@/lib/agents';
 import { createClient } from '@/lib/supabase/server';
 import { getApprovedCommunityAgents } from '@/lib/supabase/community';
-import {
-  getVoteCountsBatch,
-  type VoteTarget,
-} from '@/lib/supabase/votes';
+import { getVoteCountsBatch } from '@/lib/supabase/votes';
+import { isCurated } from '@/types/agent';
 
 export default async function HeroStats() {
-  const officialAgents = getAllAgents();
   const supabase = createClient();
-  const communityAgents = await getApprovedCommunityAgents(supabase);
+  const agents = await getApprovedCommunityAgents(supabase);
+  const voteCounts = await getVoteCountsBatch(
+    supabase,
+    agents.map((a) => a.id)
+  );
 
-  const targets: VoteTarget[] = [
-    ...officialAgents.map((a) => ({ type: 'official' as const, id: a.slug })),
-    ...communityAgents.map((a) => ({ type: 'community' as const, id: a.id })),
-  ];
-
-  const voteCounts = await getVoteCountsBatch(supabase, targets);
-
-  const totalAgents = officialAgents.length + communityAgents.length;
-  const totalCommunity = communityAgents.length;
+  const totalAgents = agents.length;
+  const totalCommunity = agents.filter((a) => !isCurated(a)).length;
   const totalUpvotes = Array.from(voteCounts.values()).reduce((a, b) => a + b, 0);
 
   return (
