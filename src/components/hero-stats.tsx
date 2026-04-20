@@ -3,7 +3,10 @@ import {
   getApprovedCommunityAgents,
   isCurrentUserAdmin,
 } from '@/lib/supabase/community';
-import { getVoteCountsBatch } from '@/lib/supabase/votes';
+import {
+  getTotalVoteCount,
+  getVoteCountSince,
+} from '@/lib/supabase/votes';
 import { isCurated } from '@/types/agent';
 
 export default async function HeroStats() {
@@ -11,19 +14,18 @@ export default async function HeroStats() {
   const isAdmin = await isCurrentUserAdmin(supabase);
   if (!isAdmin) return null;
 
-  const agents = await getApprovedCommunityAgents(supabase);
-  const voteCounts = await getVoteCountsBatch(supabase, agents.map((a) => a.id));
+  const weekAgoIso = new Date(
+    Date.now() - 7 * 24 * 60 * 60 * 1000
+  ).toISOString();
 
-  const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
-  const { count: votesThisWeek } = await supabase
-    .from('votes')
-    .select('*', { count: 'exact', head: true })
-    .eq('target_type', 'community')
-    .gte('created_at', weekAgo);
+  const [agents, totalUpvotes, votesThisWeek] = await Promise.all([
+    getApprovedCommunityAgents(supabase),
+    getTotalVoteCount(supabase),
+    getVoteCountSince(supabase, weekAgoIso),
+  ]);
 
   const totalAgents = agents.length;
   const totalCommunity = agents.filter((a) => !isCurated(a)).length;
-  const totalUpvotes = Array.from(voteCounts.values()).reduce((a, b) => a + b, 0);
   const agentsThisWeek = agents.filter(
     (a) => new Date(a.created).getTime() > Date.now() - 7 * 24 * 60 * 60 * 1000
   ).length;
@@ -46,7 +48,7 @@ export default async function HeroStats() {
       {' · '}
       <span className="text-text-secondary tabular-nums">{totalUpvotes}</span>{' '}
       {totalUpvotes === 1 ? 'upvote' : 'upvotes'}
-      {votesThisWeek && votesThisWeek > 0 && (
+      {votesThisWeek > 0 && (
         <>
           {' '}<span className="text-accent-hover tabular-nums">+{votesThisWeek}</span>{' '}
           <span className="text-text-muted">this week</span>
