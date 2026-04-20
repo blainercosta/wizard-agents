@@ -46,6 +46,14 @@ export default async function Header() {
           >
             Submit
           </Link>
+          {user && (
+            <Link
+              href="/submissions"
+              className="px-3 h-8 hidden md:flex items-center text-[13px] font-medium text-text-secondary hover:text-text-primary transition-colors rounded-md"
+            >
+              Your submissions
+            </Link>
+          )}
           {isAdmin && (
             <Link
               href="/admin"
@@ -55,7 +63,7 @@ export default async function Header() {
             </Link>
           )}
           <Link
-            href="https://github.com/blainercosta"
+            href="https://github.com/blainercosta/repo-wizard"
             target="_blank"
             rel="noopener noreferrer"
             className="px-3 h-8 hidden sm:flex items-center text-[13px] font-medium text-text-secondary hover:text-text-primary transition-colors rounded-md"

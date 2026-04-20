@@ -104,6 +104,58 @@ export async function getPendingCommunityAgents(
   return (data ?? []).map(rowToAgent);
 }
 
+export async function getCommunityAgentsByStatus(
+  supabase: SupabaseClient,
+  status: 'pending' | 'approved' | 'rejected'
+): Promise<CommunityAgent[]> {
+  const { data } = await supabase
+    .from('community_agents')
+    .select(COLUMNS)
+    .eq('status', status)
+    .is('deleted_at', null)
+    .order('updated_at', { ascending: false });
+
+  return (data ?? []).map(rowToAgent);
+}
+
+export async function getModerationCounts(
+  supabase: SupabaseClient
+): Promise<Record<'pending' | 'approved' | 'rejected', number>> {
+  const statuses: Array<'pending' | 'approved' | 'rejected'> = [
+    'pending',
+    'approved',
+    'rejected',
+  ];
+  const results = await Promise.all(
+    statuses.map((s) =>
+      supabase
+        .from('community_agents')
+        .select('*', { count: 'exact', head: true })
+        .eq('status', s)
+        .is('deleted_at', null)
+    )
+  );
+  return {
+    pending: results[0].count ?? 0,
+    approved: results[1].count ?? 0,
+    rejected: results[2].count ?? 0,
+  };
+}
+
+export async function getUserSubmissions(
+  supabase: SupabaseClient,
+  userId: string
+): Promise<CommunityAgent[]> {
+  const { data } = await supabase
+    .from('community_agents')
+    .select(COLUMNS)
+    .eq('user_id', userId)
+    .is('deleted_at', null)
+    .order('updated_at', { ascending: false });
+
+  return (data ?? []).map(rowToAgent);
+}
+
 export async function isCurrentUserAdmin(
   supabase: SupabaseClient
 ): Promise<boolean> {
