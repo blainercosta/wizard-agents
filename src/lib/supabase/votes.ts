@@ -1,8 +1,9 @@
+import { cache } from 'react';
 import type { SupabaseClient } from '@supabase/supabase-js';
 
 const TARGET_TYPE = 'community';
 
-export async function getVoteCountsBatch(
+async function getVoteCountsBatchImpl(
   supabase: SupabaseClient,
   ids: string[]
 ): Promise<Map<string, number>> {
@@ -20,6 +21,47 @@ export async function getVoteCountsBatch(
     counts.set(row.target_id, (counts.get(row.target_id) ?? 0) + 1);
   }
   return counts;
+}
+
+// Cache keyed by the joined id list so two components asking for the same
+// agents share the query. React.cache needs a stable reference argument —
+// we wrap with a key-normalizer.
+const getVoteCountsForKey = cache(
+  async (
+    supabase: SupabaseClient,
+    _key: string,
+    ids: string[]
+  ): Promise<Map<string, number>> => getVoteCountsBatchImpl(supabase, ids)
+);
+
+export function getVoteCountsBatch(
+  supabase: SupabaseClient,
+  ids: string[]
+): Promise<Map<string, number>> {
+  const key = [...ids].sort().join('|');
+  return getVoteCountsForKey(supabase, key, ids);
+}
+
+export async function getTotalVoteCount(
+  supabase: SupabaseClient
+): Promise<number> {
+  const { count } = await supabase
+    .from('votes')
+    .select('*', { count: 'exact', head: true })
+    .eq('target_type', TARGET_TYPE);
+  return count ?? 0;
+}
+
+export async function getVoteCountSince(
+  supabase: SupabaseClient,
+  sinceIso: string
+): Promise<number> {
+  const { count } = await supabase
+    .from('votes')
+    .select('*', { count: 'exact', head: true })
+    .eq('target_type', TARGET_TYPE)
+    .gte('created_at', sinceIso);
+  return count ?? 0;
 }
 
 export async function getUserVotedSet(

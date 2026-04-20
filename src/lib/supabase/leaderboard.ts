@@ -33,41 +33,33 @@ export const PERIOD_LABEL: Record<Period, string> = {
   all: 'All time',
 };
 
+type TopPersonRow = {
+  username: string;
+  avatar_url: string | null;
+  count: number;
+};
+
+type TopAgentRow = {
+  target_id: string;
+  count: number;
+};
+
 export async function getTopContributors(
   supabase: SupabaseClient,
   period: Period,
   limit = 10
 ): Promise<LeaderEntry[]> {
-  let query = supabase
-    .from('community_agents')
-    .select('author_username, author_avatar_url, created_at')
-    .eq('status', 'approved')
-    .is('deleted_at', null);
+  const { data } = await supabase.rpc('top_contributors', {
+    p_since: periodToDate(period),
+    p_limit: limit,
+  });
 
-  const since = periodToDate(period);
-  if (since) query = query.gte('created_at', since);
-
-  const { data } = await query;
   if (!data) return [];
-
-  const map = new Map<string, { avatarUrl: string | null; count: number }>();
-  for (const row of data) {
-    if (!row.author_username) continue;
-    const existing = map.get(row.author_username);
-    if (existing) {
-      existing.count += 1;
-    } else {
-      map.set(row.author_username, {
-        avatarUrl: row.author_avatar_url ?? null,
-        count: 1,
-      });
-    }
-  }
-
-  return Array.from(map.entries())
-    .map(([username, v]) => ({ username, avatarUrl: v.avatarUrl, count: v.count }))
-    .sort((a, b) => b.count - a.count)
-    .slice(0, limit);
+  return (data as TopPersonRow[]).map((row) => ({
+    username: row.username,
+    avatarUrl: row.avatar_url,
+    count: Number(row.count),
+  }));
 }
 
 export async function getTopEndorsers(
@@ -75,36 +67,17 @@ export async function getTopEndorsers(
   period: Period,
   limit = 10
 ): Promise<LeaderEntry[]> {
-  let query = supabase
-    .from('votes')
-    .select('github_username, github_avatar_url, created_at')
-    .eq('target_type', 'community')
-    .eq('is_public', true);
+  const { data } = await supabase.rpc('top_endorsers', {
+    p_since: periodToDate(period),
+    p_limit: limit,
+  });
 
-  const since = periodToDate(period);
-  if (since) query = query.gte('created_at', since);
-
-  const { data } = await query;
   if (!data) return [];
-
-  const map = new Map<string, { avatarUrl: string | null; count: number }>();
-  for (const row of data) {
-    if (!row.github_username) continue;
-    const existing = map.get(row.github_username);
-    if (existing) {
-      existing.count += 1;
-    } else {
-      map.set(row.github_username, {
-        avatarUrl: row.github_avatar_url ?? null,
-        count: 1,
-      });
-    }
-  }
-
-  return Array.from(map.entries())
-    .map(([username, v]) => ({ username, avatarUrl: v.avatarUrl, count: v.count }))
-    .sort((a, b) => b.count - a.count)
-    .slice(0, limit);
+  return (data as TopPersonRow[]).map((row) => ({
+    username: row.username,
+    avatarUrl: row.avatar_url,
+    count: Number(row.count),
+  }));
 }
 
 export async function getTopAgentsByPeriod(
@@ -112,36 +85,24 @@ export async function getTopAgentsByPeriod(
   period: Period,
   limit = 10
 ): Promise<AgentLeaderEntry[]> {
-  let query = supabase
-    .from('votes')
-    .select('target_id')
-    .eq('target_type', 'community');
+  const { data } = await supabase.rpc('top_agents_by_votes', {
+    p_since: periodToDate(period),
+    p_limit: limit,
+  });
 
-  const since = periodToDate(period);
-  if (since) query = query.gte('created_at', since);
+  if (!data || (data as TopAgentRow[]).length === 0) return [];
+  const rows = data as TopAgentRow[];
 
-  const { data } = await query;
-  if (!data) return [];
-
-  const counts = new Map<string, number>();
-  for (const row of data) {
-    counts.set(row.target_id, (counts.get(row.target_id) ?? 0) + 1);
-  }
-
-  const top = Array.from(counts.entries())
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, limit);
-
-  if (top.length === 0) return [];
-
-  const ids = top.map(([id]) => id);
-  const agents = await getAgentsByIds(supabase, ids);
+  const agents = await getAgentsByIds(
+    supabase,
+    rows.map((r) => r.target_id)
+  );
   const byId = new Map(agents.map((a) => [a.id, a]));
 
-  return top
-    .map(([id, count]) => {
-      const agent = byId.get(id);
-      return agent ? { agent, count } : null;
+  return rows
+    .map((r) => {
+      const agent = byId.get(r.target_id);
+      return agent ? { agent, count: Number(r.count) } : null;
     })
     .filter((x): x is AgentLeaderEntry => x !== null);
 }

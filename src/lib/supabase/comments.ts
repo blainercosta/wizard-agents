@@ -48,14 +48,16 @@ const COLUMNS =
 
 export async function getCommentsForAgent(
   supabase: SupabaseClient,
-  agentId: string
+  agentId: string,
+  limit = 50
 ): Promise<AgentComment[]> {
   const { data } = await supabase
     .from('comments')
     .select(COLUMNS)
     .eq('agent_id', agentId)
     .is('deleted_at', null)
-    .order('created_at', { ascending: false });
+    .order('created_at', { ascending: false })
+    .limit(limit);
 
   return (data ?? []).map(rowToComment);
 }

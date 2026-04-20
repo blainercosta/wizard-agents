@@ -45,15 +45,25 @@ export async function generateMetadata({ params }: AgentPageProps) {
 
 export default async function AgentPage({ params, searchParams }: AgentPageProps) {
   const supabase = createClient();
-  const agent = await getCommunityAgentBySlug(supabase, params.slug);
+
+  // Fetch agent and auth in parallel — they're independent.
+  const [agent, userRes] = await Promise.all([
+    getCommunityAgentBySlug(supabase, params.slug),
+    supabase.auth.getUser(),
+  ]);
 
   if (!agent) {
     notFound();
   }
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = userRes.data.user;
+
+  // Skip the version history query when the agent has never been edited —
+  // current === updated means agent_versions can't possibly have rows yet.
+  const hasHistory =
+    Math.abs(
+      new Date(agent.updated).getTime() - new Date(agent.created).getTime()
+    ) > 60_000;
 
   const [countsMap, voteState, supporters, comments, olderVersions] = await Promise.all([
     getVoteCountsBatch(supabase, [agent.id]),
@@ -62,7 +72,7 @@ export default async function AgentPage({ params, searchParams }: AgentPageProps
       : Promise.resolve({ voted: false, isPublic: false }),
     getPublicSupporters(supabase, agent.id),
     getCommentsForAgent(supabase, agent.id),
-    getVersionsForAgent(supabase, agent.id),
+    hasHistory ? getVersionsForAgent(supabase, agent.id) : Promise.resolve([]),
   ]);
   const voteCount = countsMap.get(agent.id) ?? 0;
 

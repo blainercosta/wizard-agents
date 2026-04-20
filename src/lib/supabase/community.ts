@@ -1,3 +1,4 @@
+import { cache } from 'react';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Category, CommunityAgent } from '@/types/agent';
 
@@ -66,18 +67,20 @@ function rowToAgent(row: Row): CommunityAgent {
 const COLUMNS =
   'id, slug, name, description, category, category_label, version, tags, content, status, rejection_reason, user_id, author_username, author_avatar_url, created_at, updated_at';
 
-export async function getApprovedCommunityAgents(
-  supabase: SupabaseClient
-): Promise<CommunityAgent[]> {
-  const { data } = await supabase
-    .from('community_agents')
-    .select(COLUMNS)
-    .eq('status', 'approved')
-    .is('deleted_at', null)
-    .order('created_at', { ascending: false });
+// React.cache dedupes across components within the same request, so the
+// home page (HeroStats + AgentListing) only hits Supabase once per render.
+export const getApprovedCommunityAgents = cache(
+  async (supabase: SupabaseClient): Promise<CommunityAgent[]> => {
+    const { data } = await supabase
+      .from('community_agents')
+      .select(COLUMNS)
+      .eq('status', 'approved')
+      .is('deleted_at', null)
+      .order('created_at', { ascending: false });
 
-  return (data ?? []).map(rowToAgent);
-}
+    return (data ?? []).map(rowToAgent);
+  }
+);
 
 export async function getCommunityAgentBySlug(
   supabase: SupabaseClient,
