@@ -1,14 +1,28 @@
 import Link from 'next/link';
 import { CATEGORIES, Category, type ListedAgent } from '@/types/agent';
+import type { SortKey } from './sort-control';
 
 interface CategoryFilterProps {
   activeCategory?: Category | 'all';
   agents?: ListedAgent[];
+  currentSort?: SortKey;
+}
+
+export function buildListingHref(
+  category: Category | 'all',
+  sort?: SortKey
+): string {
+  const params = new URLSearchParams();
+  if (category !== 'all') params.set('category', category);
+  if (sort && sort !== 'recent') params.set('sort', sort);
+  const qs = params.toString();
+  return qs ? `/?${qs}` : '/';
 }
 
 export default function CategoryFilter({
   activeCategory = 'all',
   agents,
+  currentSort,
 }: CategoryFilterProps) {
   const counts = new Map<Category, number>();
   if (agents) {
@@ -27,13 +41,14 @@ export default function CategoryFilter({
     <div className="flex flex-wrap gap-2">
       {visible.map(({ value, label }) => {
         const isActive = activeCategory === value;
-        const href = value === 'all' ? '/' : `/category/${value}`;
+        const href = buildListingHref(value as Category | 'all', currentSort);
         const count = value === 'all' ? agents?.length : counts.get(value as Category);
 
         return (
           <Link
             key={value}
             href={href}
+            scroll={false}
             className={`inline-flex items-center gap-1.5 h-8 px-3 text-[13px] font-medium rounded-full border transition-colors ${
               isActive
                 ? 'bg-white/[0.08] border-border text-text-primary'

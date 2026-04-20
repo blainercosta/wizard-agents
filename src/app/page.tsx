@@ -1,56 +1,38 @@
-import { getAllAgents } from '@/lib/agents';
-import { Header, Footer, AgentGrid, CategoryFilter, SortControl, LinkButton } from '@/components';
-import { createClient } from '@/lib/supabase/server';
-import { getApprovedCommunityAgents } from '@/lib/supabase/community';
+import { Suspense } from 'react';
 import {
-  getVoteCountsBatch,
-  getUserVotedSet,
-  type VoteTarget,
-} from '@/lib/supabase/votes';
-import type { ListedAgent } from '@/types/agent';
-import { parseSortParam, sortAgents } from '@/lib/utils';
+  Header,
+  Footer,
+  LinkButton,
+  AgentListing,
+  HeroStats,
+  ListingSkeleton,
+  StatsSkeleton,
+} from '@/components';
+import type { Category } from '@/types/agent';
+import { parseSortParam } from '@/lib/utils';
 
-export default async function Home({
+const validCategories: Category[] = [
+  'design',
+  'development',
+  'automation',
+  'writing',
+  'business',
+  'marketing',
+];
+
+function parseCategoryParam(raw: string | string[] | undefined): Category | 'all' {
+  const val = Array.isArray(raw) ? raw[0] : raw;
+  if (val && validCategories.includes(val as Category)) return val as Category;
+  return 'all';
+}
+
+export default function Home({
   searchParams,
 }: {
-  searchParams: { sort?: string };
+  searchParams: { category?: string; sort?: string };
 }) {
+  const activeCategory = parseCategoryParam(searchParams.category);
   const sort = parseSortParam(searchParams.sort);
-  const officialAgents = getAllAgents();
-  const supabase = createClient();
-
-  const [
-    communityAgents,
-    {
-      data: { user },
-    },
-  ] = await Promise.all([
-    getApprovedCommunityAgents(supabase),
-    supabase.auth.getUser(),
-  ]);
-
-  const listed: ListedAgent[] = [
-    ...officialAgents.map((a) => ({ source: 'official' as const, ...a })),
-    ...communityAgents.map((a) => ({ source: 'community' as const, ...a })),
-  ];
-
-  const targets: VoteTarget[] = listed.map((a) => ({
-    type: a.source,
-    id: a.source === 'community' ? a.id : a.slug,
-  }));
-
-  const [voteCounts, votedSet] = await Promise.all([
-    getVoteCountsBatch(supabase, targets),
-    user
-      ? getUserVotedSet(supabase, user.id, targets)
-      : Promise.resolve(new Set<string>()),
-  ]);
-
-  const sortedList = sortAgents(listed, sort, voteCounts);
-
-  const totalAgents = listed.length;
-  const totalCommunity = communityAgents.length;
-  const totalUpvotes = Array.from(voteCounts.values()).reduce((a, b) => a + b, 0);
 
   return (
     <div className="min-h-screen flex flex-col bg-background-primary">
@@ -74,30 +56,18 @@ export default async function Home({
             </LinkButton>
           </div>
 
-          <p className="text-[13px] text-text-muted">
-            <span className="text-text-secondary tabular-nums">{totalAgents}</span> agents
-            {totalCommunity > 0 && (
-              <>
-                {' '}(<span className="tabular-nums">{totalCommunity}</span> from the community)
-              </>
-            )}
-            {' · '}
-            <span className="text-text-secondary tabular-nums">{totalUpvotes}</span>{' '}
-            {totalUpvotes === 1 ? 'upvote' : 'upvotes'} so far
-          </p>
+          <Suspense fallback={<StatsSkeleton />}>
+            <HeroStats />
+          </Suspense>
         </section>
 
         <section id="agents" className="max-w-6xl mx-auto px-6 pb-20 scroll-mt-16">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-            <CategoryFilter activeCategory="all" agents={listed} />
-            <SortControl active={sort} basePath="/" />
-          </div>
-          <AgentGrid
-            agents={sortedList}
-            voteCounts={voteCounts}
-            votedSet={votedSet}
-            isAuthenticated={!!user}
-          />
+          <Suspense
+            key={`${activeCategory}-${sort}`}
+            fallback={<ListingSkeleton />}
+          >
+            <AgentListing activeCategory={activeCategory} sort={sort} />
+          </Suspense>
         </section>
       </main>
 

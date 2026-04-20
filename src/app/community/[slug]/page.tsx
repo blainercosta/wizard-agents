@@ -59,7 +59,7 @@ export default async function CommunityAgentPage({
     searchParams.from && validCategories.includes(searchParams.from as Category)
       ? (searchParams.from as Category)
       : null;
-  const backHref = fromCategory ? `/category/${fromCategory}` : '/';
+  const backHref = fromCategory ? `/?category=${fromCategory}` : '/';
   const backLabel = fromCategory
     ? `Back to ${getCategoryLabel(fromCategory)}`
     : 'All agents';
