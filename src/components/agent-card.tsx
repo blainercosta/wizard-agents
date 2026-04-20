@@ -2,12 +2,20 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { AgentCard as AgentCardType } from '@/types/agent';
-import { getCategoryLabel, copyToClipboard, downloadFile, isNew } from '@/lib/utils';
+import Image from 'next/image';
+import type { ListedAgent } from '@/types/agent';
+import {
+  getCategoryLabel,
+  copyToClipboard,
+  downloadFile,
+  isNew,
+  agentHref,
+  agentVoteTargetId,
+} from '@/lib/utils';
 import UpvoteButton from './upvote-button';
 
 interface AgentCardProps {
-  agent: AgentCardType;
+  agent: ListedAgent;
   voteCount: number;
   hasVoted: boolean;
   isAuthenticated: boolean;
@@ -37,10 +45,12 @@ export default function AgentCard({
     downloadFile(agent.rawContent, `${agent.slug}.md`);
   };
 
-  const hiddenTags = agent.tags && agent.tags.length > 3 ? agent.tags.slice(3) : [];
+  const tags = agent.tags ?? [];
+  const hiddenTags = tags.length > 3 ? tags.slice(3) : [];
+  const author = agent.source === 'community' ? agent.author : null;
 
   return (
-    <Link href={`/agent/${agent.slug}`} className="block group">
+    <Link href={agentHref(agent)} className="block group">
       <article className="bg-background-secondary border-2 border-border p-5 sm:p-6 h-full flex flex-col transition-all duration-150 group-hover:border-accent-lilac group-hover:-translate-y-0.5 group-hover:shadow-[4px_4px_0_0_rgba(167,139,250,0.3)]">
         <div className="flex items-start justify-between gap-2 mb-2">
           <div className="flex items-center gap-2 flex-wrap">
@@ -52,10 +62,15 @@ export default function AgentCard({
                 NEW
               </span>
             )}
+            {agent.source === 'community' && (
+              <span className="px-2 py-0.5 border border-accent-lilac text-accent-lilac text-[10px] font-mono font-bold">
+                COMMUNITY
+              </span>
+            )}
           </div>
           <UpvoteButton
-            targetType="official"
-            targetId={agent.slug}
+            targetType={agent.source}
+            targetId={agentVoteTargetId(agent)}
             initialCount={voteCount}
             initialVoted={hasVoted}
             isAuthenticated={isAuthenticated}
@@ -70,9 +85,26 @@ export default function AgentCard({
           {agent.description}
         </p>
 
-        {agent.tags && agent.tags.length > 0 && (
+        {author && (
+          <div className="flex items-center gap-2 mb-3">
+            {author.avatarUrl && (
+              <Image
+                src={author.avatarUrl}
+                alt={author.username}
+                width={16}
+                height={16}
+                className="border border-border"
+              />
+            )}
+            <span className="font-mono text-xs text-text-muted">
+              by @{author.username}
+            </span>
+          </div>
+        )}
+
+        {tags.length > 0 && (
           <div className="flex flex-wrap gap-2 mb-4">
-            {agent.tags.slice(0, 3).map((tag) => (
+            {tags.slice(0, 3).map((tag) => (
               <span
                 key={tag}
                 className="px-2 py-1 bg-transparent border border-accent-lilac text-accent-lilac text-xs font-mono"

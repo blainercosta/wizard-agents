@@ -49,6 +49,18 @@ export function slugify(text: string): string {
     .replace(/(^-|-$)/g, '');
 }
 
+import type { ListedAgent } from '@/types/agent';
+
+export function agentHref(agent: ListedAgent): string {
+  return agent.source === 'community'
+    ? `/community/${agent.slug}`
+    : `/agent/${agent.slug}`;
+}
+
+export function agentVoteTargetId(agent: ListedAgent): string {
+  return agent.source === 'community' ? agent.id : agent.slug;
+}
+
 export function isNew(dateString: string, daysThreshold: number = 14): boolean {
   const date = new Date(dateString);
   const now = new Date();

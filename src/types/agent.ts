@@ -22,6 +22,32 @@ export interface AgentCard extends AgentFrontmatter {
   rawContent: string;
 }
 
+export interface CommunityAuthor {
+  username: string;
+  avatarUrl: string | null;
+}
+
+export interface CommunityAgent {
+  id: string;
+  slug: string;
+  name: string;
+  description: string;
+  category: Category;
+  version: string;
+  tags: string[];
+  content: string;
+  rawContent: string;
+  created: string;
+  updated: string;
+  status: 'pending' | 'approved' | 'rejected';
+  rejectionReason: string | null;
+  author: CommunityAuthor;
+}
+
+export type ListedAgent =
+  | ({ source: 'official' } & AgentCard)
+  | ({ source: 'community' } & CommunityAgent);
+
 export const CATEGORIES: { value: Category | 'all'; label: string }[] = [
   { value: 'all', label: 'All' },
   { value: 'design', label: 'Design' },

@@ -2,12 +2,16 @@ import Link from 'next/link';
 import WizardLogo from './wizard-logo';
 import AuthButtons from './auth-buttons';
 import { createClient } from '@/lib/supabase/server';
+import { isCurrentUserAdmin } from '@/lib/supabase/community';
 
 export default async function Header() {
   const supabase = createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const [
+    {
+      data: { user },
+    },
+    isAdmin,
+  ] = await Promise.all([supabase.auth.getUser(), isCurrentUserAdmin(supabase)]);
 
   const authUser = user
     ? {
@@ -37,10 +41,24 @@ export default async function Header() {
             Agents
           </Link>
           <Link
+            href="/submit"
+            className="text-text-secondary hover:text-accent-lilac transition-colors text-sm font-mono"
+          >
+            Submit
+          </Link>
+          {isAdmin && (
+            <Link
+              href="/admin"
+              className="text-accent-neon hover:text-accent-lilac transition-colors text-sm font-mono"
+            >
+              Admin
+            </Link>
+          )}
+          <Link
             href="https://github.com/blainercosta"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-text-secondary hover:text-accent-lilac transition-colors text-sm font-mono"
+            className="text-text-secondary hover:text-accent-lilac transition-colors text-sm font-mono hidden sm:inline"
           >
             GitHub
           </Link>

@@ -2,9 +2,10 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { getAgentsByCategory } from '@/lib/agents';
 import { getCategoryLabel } from '@/lib/utils';
-import { Category } from '@/types/agent';
+import { Category, type ListedAgent } from '@/types/agent';
 import { Header, Footer, AgentGrid, CategoryFilter } from '@/components';
 import { createClient } from '@/lib/supabase/server';
+import { getApprovedCommunityAgents } from '@/lib/supabase/community';
 import {
   getVoteCountsBatch,
   getUserVotedSet,
@@ -17,7 +18,13 @@ interface CategoryPageProps {
   };
 }
 
-const validCategories: Category[] = ['design', 'development', 'automation', 'writing', 'business'];
+const validCategories: Category[] = [
+  'design',
+  'development',
+  'automation',
+  'writing',
+  'business',
+];
 
 export async function generateStaticParams() {
   return validCategories.map((category) => ({ category }));
@@ -45,31 +52,49 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
     notFound();
   }
 
-  const agents = getAgentsByCategory(category);
-  const categoryLabel = getCategoryLabel(category);
-
+  const officialAgents = getAgentsByCategory(category);
   const supabase = createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  const targets: VoteTarget[] = agents.map((a) => ({
-    type: 'official',
-    id: a.slug,
+
+  const [
+    allCommunity,
+    {
+      data: { user },
+    },
+  ] = await Promise.all([
+    getApprovedCommunityAgents(supabase),
+    supabase.auth.getUser(),
+  ]);
+
+  const communityAgents = allCommunity.filter((a) => a.category === category);
+
+  const listed: ListedAgent[] = [
+    ...officialAgents.map((a) => ({ source: 'official' as const, ...a })),
+    ...communityAgents.map((a) => ({ source: 'community' as const, ...a })),
+  ].sort(
+    (a, b) => new Date(b.updated).getTime() - new Date(a.updated).getTime()
+  );
+
+  const targets: VoteTarget[] = listed.map((a) => ({
+    type: a.source,
+    id: a.source === 'community' ? a.id : a.slug,
   }));
+
   const [voteCounts, votedSet] = await Promise.all([
     getVoteCountsBatch(supabase, targets),
-    user ? getUserVotedSet(supabase, user.id, targets) : Promise.resolve(new Set<string>()),
+    user
+      ? getUserVotedSet(supabase, user.id, targets)
+      : Promise.resolve(new Set<string>()),
   ]);
+
+  const categoryLabel = getCategoryLabel(category);
 
   return (
     <div className="min-h-screen flex flex-col bg-background-primary">
       <Header />
 
       <main className="flex-1">
-        {/* Hero Section */}
         <section className="border-b border-border bg-background-secondary mb-8">
           <div className="max-w-6xl mx-auto px-4 pt-16 pb-12">
-            {/* Breadcrumb */}
             <nav className="flex items-center gap-2 text-sm font-mono mb-4">
               <Link
                 href="/"
@@ -86,16 +111,15 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
               <span className="text-accent-neon">_</span>AGENTS
             </h1>
             <p className="text-text-secondary font-mono text-sm md:text-base max-w-xl">
-              {agents.length} agent{agents.length !== 1 ? 's' : ''} in this category.
+              {listed.length} agent{listed.length !== 1 ? 's' : ''} in this category.
             </p>
           </div>
         </section>
 
-        {/* Agents Section */}
         <section className="max-w-6xl mx-auto px-4">
           <CategoryFilter activeCategory={category} />
           <AgentGrid
-            agents={agents}
+            agents={listed}
             voteCounts={voteCounts}
             votedSet={votedSet}
             isAuthenticated={!!user}

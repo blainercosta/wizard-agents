@@ -1,8 +1,9 @@
-import { AgentCard as AgentCardType } from '@/types/agent';
+import type { ListedAgent } from '@/types/agent';
+import { agentVoteTargetId } from '@/lib/utils';
 import AgentCard from './agent-card';
 
 interface AgentGridProps {
-  agents: AgentCardType[];
+  agents: ListedAgent[];
   voteCounts: Map<string, number>;
   votedSet: Set<string>;
   isAuthenticated: boolean;
@@ -30,10 +31,11 @@ export default function AgentGrid({
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {agents.map((agent) => {
-        const key = `official:${agent.slug}`;
+        const key = `${agent.source}:${agentVoteTargetId(agent)}`;
+        const cardKey = `${agent.source}:${agent.slug}`;
         return (
           <AgentCard
-            key={agent.slug}
+            key={cardKey}
             agent={agent}
             voteCount={voteCounts.get(key) ?? 0}
             hasVoted={votedSet.has(key)}
