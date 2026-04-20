@@ -91,6 +91,14 @@ export default async function AdminPage({
             })}
           </div>
 
+          <h2 className="sr-only">
+            {status === 'pending'
+              ? 'Pending submissions'
+              : status === 'approved'
+                ? 'Approved submissions'
+                : 'Rejected submissions'}
+          </h2>
+
           {agents.length === 0 ? (
             <div className="bg-white/[0.02] border border-border rounded-lg p-10 text-center">
               <p className="text-text-muted text-[15px]">

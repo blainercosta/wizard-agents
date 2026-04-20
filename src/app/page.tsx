@@ -49,6 +49,7 @@ export default function Home({
         </section>
 
         <section id="agents" className="max-w-6xl mx-auto px-6 pb-20 scroll-mt-16">
+          <h2 className="sr-only">Agents</h2>
           <Suspense
             key={`${activeCategory}-${sort}`}
             fallback={<ListingSkeleton />}

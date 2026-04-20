@@ -254,7 +254,7 @@ function CommentItem({
         <div className="flex items-baseline gap-2 mb-1 flex-wrap">
           <Link
             href={`/u/${comment.username}`}
-            className="text-[13px] font-medium text-text-primary hover:text-accent-lilac transition-colors"
+            className="text-[13px] font-medium text-text-primary hover:text-accent-lilac underline underline-offset-2 decoration-border-subtle hover:decoration-accent-lilac/60 transition-colors"
           >
             @{comment.username}
           </Link>

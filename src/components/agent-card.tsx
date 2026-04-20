@@ -122,7 +122,7 @@ export default function AgentCard({
             )}
             <Link
               href={`/u/${agent.author.username}`}
-              className="text-xs text-text-muted hover:text-text-primary transition-colors"
+              className="text-xs text-text-muted hover:text-text-primary underline underline-offset-2 decoration-border-subtle hover:decoration-text-muted transition-colors"
             >
               by @{agent.author.username}
             </Link>
