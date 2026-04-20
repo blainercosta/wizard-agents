@@ -10,3 +10,5 @@ export { default as CategoryFilter } from './category-filter';
 export { default as MarkdownPreview } from './markdown-preview';
 export { default as UpvoteButton } from './upvote-button';
 export { default as UpvoteSection } from './upvote-section';
+export { Button, LinkButton } from './button';
+export { default as SortControl, type SortKey } from './sort-control';
