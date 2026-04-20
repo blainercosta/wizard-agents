@@ -137,10 +137,8 @@ export default async function AgentPage({ params, searchParams }: AgentPageProps
             <div className="flex flex-col gap-2.5 text-[13px]">
               <div className="flex items-center gap-2">
                 <span className="text-text-muted shrink-0">By</span>
-                <a
-                  href={`https://github.com/${agent.author.username}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                <Link
+                  href={`/u/${agent.author.username}`}
                   className="inline-flex items-center gap-1.5 h-6 pl-0.5 pr-2 rounded-full bg-white/[0.04] border border-border-subtle hover:bg-white/[0.08] transition-colors"
                 >
                   {agent.author.avatarUrl && (
@@ -158,7 +156,7 @@ export default async function AgentPage({ params, searchParams }: AgentPageProps
                   {curated && (
                     <VerifiedBadge className="w-3.5 h-3.5 text-accent-hover shrink-0" />
                   )}
-                </a>
+                </Link>
               </div>
 
               {agent.tags && agent.tags.length > 0 && (

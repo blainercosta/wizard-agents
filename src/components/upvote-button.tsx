@@ -1,9 +1,10 @@
 'use client';
 
-import { useState, useTransition, useEffect, useRef } from 'react';
-import { ChevronUp, Github } from 'lucide-react';
+import { useState, useTransition } from 'react';
+import { ChevronUp } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { VOTE_TARGET_TYPE } from '@/lib/supabase/votes';
+import SignInPopover from './sign-in-popover';
 
 type Props = {
   targetId: string;
@@ -24,28 +25,7 @@ export default function UpvoteButton({
   const [voted, setVoted] = useState(initialVoted);
   const [showPrompt, setShowPrompt] = useState(false);
   const [pending, startTransition] = useTransition();
-  const wrapperRef = useRef<HTMLDivElement>(null);
   const supabase = createClient();
-
-  useEffect(() => {
-    if (!showPrompt) return;
-    function handleOutside(e: MouseEvent) {
-      if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) {
-        setShowPrompt(false);
-      }
-    }
-    document.addEventListener('mousedown', handleOutside);
-    return () => document.removeEventListener('mousedown', handleOutside);
-  }, [showPrompt]);
-
-  async function signIn(e: React.MouseEvent) {
-    e.preventDefault();
-    e.stopPropagation();
-    await supabase.auth.signInWithOAuth({
-      provider: 'github',
-      options: { redirectTo: `${window.location.origin}/auth/callback` },
-    });
-  }
 
   async function handleClick(e: React.MouseEvent) {
     e.preventDefault();
@@ -85,7 +65,7 @@ export default function UpvoteButton({
   const iconSize = size === 'md' ? 'w-4 h-4' : 'w-3.5 h-3.5';
 
   return (
-    <div ref={wrapperRef} className="relative">
+    <div className="relative">
       <button
         onClick={handleClick}
         disabled={pending}
@@ -101,41 +81,11 @@ export default function UpvoteButton({
         <span className="tabular-nums">{count}</span>
       </button>
 
-      {showPrompt && (
-        <div
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-          }}
-          className="absolute top-full right-0 mt-2 w-[260px] bg-background-secondary border border-border rounded-md shadow-elevated p-3 z-30"
-        >
-          <p className="text-[13px] font-medium text-text-primary mb-1">
-            Sign in to upvote
-          </p>
-          <p className="text-xs text-text-muted mb-3 leading-relaxed">
-            We use GitHub for identity only — no emails, no spam.
-          </p>
-          <div className="flex gap-2">
-            <button
-              onClick={signIn}
-              className="inline-flex items-center gap-1.5 h-7 px-2.5 text-xs font-medium text-white bg-accent-brand hover:bg-accent-hover rounded-md transition-colors"
-            >
-              <Github className="w-3.5 h-3.5" />
-              Continue
-            </button>
-            <button
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                setShowPrompt(false);
-              }}
-              className="inline-flex items-center h-7 px-2.5 text-xs font-medium text-text-secondary bg-transparent hover:bg-white/[0.04] rounded-md transition-colors"
-            >
-              Cancel
-            </button>
-          </div>
-        </div>
-      )}
+      <SignInPopover
+        open={showPrompt}
+        onClose={() => setShowPrompt(false)}
+        title="Sign in to upvote"
+      />
     </div>
   );
 }

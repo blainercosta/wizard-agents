@@ -1,5 +1,8 @@
 import { createClient } from '@/lib/supabase/server';
-import { getApprovedCommunityAgents } from '@/lib/supabase/community';
+import {
+  getApprovedCommunityAgents,
+  getUserBookmarkedSet,
+} from '@/lib/supabase/community';
 import { getVoteCountsBatch, getUserVotedSet } from '@/lib/supabase/votes';
 import { sortAgents, isNew } from '@/lib/utils';
 import type { Category } from '@/types/agent';
@@ -28,17 +31,18 @@ export default async function AgentListing({ activeCategory, sort }: Props) {
 
   const ids = filtered.map((a) => a.id);
 
-  const [voteCounts, votedSet] = await Promise.all([
+  const [voteCounts, votedSet, bookmarkedSet] = await Promise.all([
     getVoteCountsBatch(supabase, ids),
     user
       ? getUserVotedSet(supabase, user.id, ids)
+      : Promise.resolve(new Set<string>()),
+    user
+      ? getUserBookmarkedSet(supabase, user.id)
       : Promise.resolve(new Set<string>()),
   ]);
 
   const sorted = sortAgents(filtered, sort, voteCounts);
 
-  // "New this week" highlight only shows on the unfiltered, default-sorted view
-  // so it doesn't compete with the user's active filter or sort intent.
   const showHighlight = activeCategory === 'all' && sort === 'recent';
   const highlightAgents = showHighlight
     ? filtered
@@ -63,6 +67,7 @@ export default async function AgentListing({ activeCategory, sort }: Props) {
           agents={highlightAgents}
           voteCounts={voteCounts}
           votedSet={votedSet}
+          bookmarkedSet={bookmarkedSet}
           isAuthenticated={!!user}
         />
       )}
@@ -71,6 +76,7 @@ export default async function AgentListing({ activeCategory, sort }: Props) {
         agents={sorted}
         voteCounts={voteCounts}
         votedSet={votedSet}
+        bookmarkedSet={bookmarkedSet}
         isAuthenticated={!!user}
         fromCategory={activeCategory === 'all' ? undefined : activeCategory}
       />

@@ -156,6 +156,133 @@ export async function getUserSubmissions(
   return (data ?? []).map(rowToAgent);
 }
 
+export async function getUserBookmarkedSet(
+  supabase: SupabaseClient,
+  userId: string
+): Promise<Set<string>> {
+  const { data } = await supabase
+    .from('bookmarks')
+    .select('agent_id')
+    .eq('user_id', userId);
+
+  const set = new Set<string>();
+  if (!data) return set;
+  for (const row of data) set.add(row.agent_id);
+  return set;
+}
+
+export type UserProfile = {
+  username: string;
+  avatarUrl: string | null;
+  githubId: number | null;
+};
+
+export async function getUserProfileByUsername(
+  supabase: SupabaseClient,
+  username: string
+): Promise<UserProfile | null> {
+  const [agentRes, voteRes] = await Promise.all([
+    supabase
+      .from('community_agents')
+      .select('author_username, author_avatar_url, author_github_id')
+      .eq('author_username', username)
+      .eq('status', 'approved')
+      .is('deleted_at', null)
+      .limit(1)
+      .maybeSingle(),
+    supabase
+      .from('votes')
+      .select('github_username, github_avatar_url, github_user_id')
+      .eq('github_username', username)
+      .limit(1)
+      .maybeSingle(),
+  ]);
+
+  const fromAgent = agentRes.data;
+  const fromVote = voteRes.data;
+  if (!fromAgent && !fromVote) return null;
+
+  return {
+    username,
+    avatarUrl: fromAgent?.author_avatar_url ?? fromVote?.github_avatar_url ?? null,
+    githubId: fromAgent?.author_github_id ?? fromVote?.github_user_id ?? null,
+  };
+}
+
+export async function getAgentsByAuthor(
+  supabase: SupabaseClient,
+  username: string
+): Promise<CommunityAgent[]> {
+  const { data } = await supabase
+    .from('community_agents')
+    .select(COLUMNS)
+    .eq('author_username', username)
+    .eq('status', 'approved')
+    .is('deleted_at', null)
+    .order('created_at', { ascending: false });
+
+  return (data ?? []).map(rowToAgent);
+}
+
+export async function getPublicEndorsementsByUser(
+  supabase: SupabaseClient,
+  username: string
+): Promise<CommunityAgent[]> {
+  const { data: votes } = await supabase
+    .from('votes')
+    .select('target_id, created_at')
+    .eq('github_username', username)
+    .eq('is_public', true)
+    .eq('target_type', 'community')
+    .order('created_at', { ascending: false });
+
+  if (!votes || votes.length === 0) return [];
+
+  const ids = votes.map((v) => v.target_id);
+  const { data: agents } = await supabase
+    .from('community_agents')
+    .select(COLUMNS)
+    .in('id', ids)
+    .eq('status', 'approved')
+    .is('deleted_at', null);
+
+  if (!agents) return [];
+
+  const byId = new Map(agents.map((a) => [a.id, rowToAgent(a)]));
+  return votes
+    .map((v) => byId.get(v.target_id))
+    .filter((a): a is CommunityAgent => Boolean(a));
+}
+
+export async function getUserBookmarks(
+  supabase: SupabaseClient,
+  userId: string
+): Promise<CommunityAgent[]> {
+  const { data: bookmarks } = await supabase
+    .from('bookmarks')
+    .select('agent_id, created_at')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false });
+
+  if (!bookmarks || bookmarks.length === 0) return [];
+
+  const agentIds = bookmarks.map((b) => b.agent_id);
+
+  const { data: agents } = await supabase
+    .from('community_agents')
+    .select(COLUMNS)
+    .in('id', agentIds)
+    .eq('status', 'approved')
+    .is('deleted_at', null);
+
+  if (!agents) return [];
+
+  const byId = new Map(agents.map((a) => [a.id, rowToAgent(a)]));
+  return bookmarks
+    .map((b) => byId.get(b.agent_id))
+    .filter((a): a is CommunityAgent => Boolean(a));
+}
+
 export async function isCurrentUserAdmin(
   supabase: SupabaseClient
 ): Promise<boolean> {

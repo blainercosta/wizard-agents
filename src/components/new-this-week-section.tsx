@@ -6,6 +6,7 @@ interface Props {
   agents: CommunityAgent[];
   voteCounts: Map<string, number>;
   votedSet: Set<string>;
+  bookmarkedSet?: Set<string>;
   isAuthenticated: boolean;
 }
 
@@ -13,6 +14,7 @@ export default function NewThisWeekSection({
   agents,
   voteCounts,
   votedSet,
+  bookmarkedSet,
   isAuthenticated,
 }: Props) {
   if (agents.length === 0) return null;
@@ -35,6 +37,7 @@ export default function NewThisWeekSection({
             agent={agent}
             voteCount={voteCounts.get(agent.id) ?? 0}
             hasVoted={votedSet.has(agent.id)}
+            hasBookmarked={bookmarkedSet?.has(agent.id) ?? false}
             isAuthenticated={isAuthenticated}
           />
         ))}

@@ -17,3 +17,5 @@ export { default as AgentListing } from './agent-listing';
 export { default as HeroStats } from './hero-stats';
 export { default as VerifiedBadge } from './verified-badge';
 export { default as NewThisWeekSection } from './new-this-week-section';
+export { default as BookmarkButton } from './bookmark-button';
+export { default as SignInPopover } from './sign-in-popover';
