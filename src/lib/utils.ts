@@ -55,15 +55,24 @@ export function agentHref(agent: CommunityAgent, fromCategory?: string): string 
   return fromCategory ? `${base}?from=${fromCategory}` : base;
 }
 
+// Hacker News-style decay: score = votes / (hours_since_creation + 2)^1.5
+// Favors agents picking up recent traction over all-time leaders.
+function trendingScore(voteCount: number, createdAt: string): number {
+  const hours = (Date.now() - new Date(createdAt).getTime()) / 36e5;
+  return voteCount / Math.pow(hours + 2, 1.5);
+}
+
 export function sortAgents(
   agents: CommunityAgent[],
   sort: SortKey,
   voteCounts?: Map<string, number>
 ): CommunityAgent[] {
   const copy = [...agents];
-  if (sort === 'top' && voteCounts) {
+  if (sort === 'trending' && voteCounts) {
     copy.sort((a, b) => {
-      const diff = (voteCounts.get(b.id) ?? 0) - (voteCounts.get(a.id) ?? 0);
+      const sa = trendingScore(voteCounts.get(a.id) ?? 0, a.created);
+      const sb = trendingScore(voteCounts.get(b.id) ?? 0, b.created);
+      const diff = sb - sa;
       if (diff !== 0) return diff;
       return new Date(b.updated).getTime() - new Date(a.updated).getTime();
     });
@@ -81,8 +90,20 @@ export function sortAgents(
 
 export function parseSortParam(raw: string | string[] | undefined): SortKey {
   const val = Array.isArray(raw) ? raw[0] : raw;
-  if (val === 'top' || val === 'new') return val;
+  if (val === 'trending' || val === 'new') return val;
   return 'recent';
+}
+
+export function isRecentlyUpdated(
+  agent: { created: string; updated: string },
+  daysThreshold = 3
+): boolean {
+  if (agent.created === agent.updated) return false;
+  const updated = new Date(agent.updated);
+  const created = new Date(agent.created);
+  if (Math.abs(updated.getTime() - created.getTime()) < 60_000) return false;
+  const diffDays = (Date.now() - updated.getTime()) / (1000 * 60 * 60 * 24);
+  return diffDays <= daysThreshold;
 }
 
 export function isNew(dateString: string, daysThreshold: number = 14): boolean {

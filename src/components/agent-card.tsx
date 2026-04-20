@@ -9,6 +9,7 @@ import {
   copyToClipboard,
   downloadFile,
   isNew,
+  isRecentlyUpdated,
   agentHref,
 } from '@/lib/utils';
 import UpvoteButton from './upvote-button';
@@ -66,6 +67,11 @@ export default function AgentCard({
             {isNew(agent.created) && (
               <span className="inline-flex items-center h-5 px-2 text-[10px] font-medium text-accent-hover bg-accent-brand/15 border border-accent-brand/40 rounded-full">
                 New
+              </span>
+            )}
+            {!isNew(agent.created) && isRecentlyUpdated(agent) && (
+              <span className="inline-flex items-center h-5 px-2 text-[10px] font-medium text-text-secondary bg-white/[0.04] border border-border-subtle rounded-full">
+                Updated
               </span>
             )}
             {showAuthor && (
