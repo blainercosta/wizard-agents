@@ -100,7 +100,7 @@ function SubmissionItem({ submission: s }: { submission: CommunityAgent }) {
   const titleEl =
     s.status === 'approved' ? (
       <Link
-        href={`/community/${s.slug}`}
+        href={`/agent/${s.slug}`}
         className="text-[15px] font-semibold text-text-primary tracking-tight hover:text-accent-lilac transition-colors"
       >
         {s.name}

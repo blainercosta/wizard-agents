@@ -1,10 +1,10 @@
 import Link from 'next/link';
-import { CATEGORIES, Category, type ListedAgent } from '@/types/agent';
+import { CATEGORIES, Category, type CommunityAgent } from '@/types/agent';
 import type { SortKey } from './sort-control';
 
 interface CategoryFilterProps {
   activeCategory?: Category | 'all';
-  agents?: ListedAgent[];
+  agents?: CommunityAgent[];
   currentSort?: SortKey;
 }
 

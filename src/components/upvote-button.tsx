@@ -3,9 +3,9 @@
 import { useState, useTransition, useEffect, useRef } from 'react';
 import { ChevronUp, Github } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
+import { VOTE_TARGET_TYPE } from '@/lib/supabase/votes';
 
 type Props = {
-  targetType: 'official' | 'community';
   targetId: string;
   initialCount: number;
   initialVoted: boolean;
@@ -14,7 +14,6 @@ type Props = {
 };
 
 export default function UpvoteButton({
-  targetType,
   targetId,
   initialCount,
   initialVoted,
@@ -65,12 +64,12 @@ export default function UpvoteButton({
     startTransition(async () => {
       const { error } = nextVoted
         ? await supabase.rpc('cast_vote', {
-            p_target_type: targetType,
+            p_target_type: VOTE_TARGET_TYPE,
             p_target_id: targetId,
             p_is_public: false,
           })
         : await supabase.rpc('remove_vote', {
-            p_target_type: targetType,
+            p_target_type: VOTE_TARGET_TYPE,
             p_target_id: targetId,
           });
 

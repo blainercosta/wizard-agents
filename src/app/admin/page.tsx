@@ -127,7 +127,7 @@ function HistoryCard({
   status: 'approved' | 'rejected';
 }) {
   const isApproved = status === 'approved';
-  const href = `/community/${agent.slug}`;
+  const href = `/agent/${agent.slug}`;
 
   return (
     <article className="bg-white/[0.02] border border-border rounded-lg p-5">

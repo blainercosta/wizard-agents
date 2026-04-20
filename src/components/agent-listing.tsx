@@ -1,13 +1,8 @@
-import { getAllAgents } from '@/lib/agents';
 import { createClient } from '@/lib/supabase/server';
 import { getApprovedCommunityAgents } from '@/lib/supabase/community';
-import {
-  getVoteCountsBatch,
-  getUserVotedSet,
-  type VoteTarget,
-} from '@/lib/supabase/votes';
+import { getVoteCountsBatch, getUserVotedSet } from '@/lib/supabase/votes';
 import { sortAgents } from '@/lib/utils';
-import type { Category, ListedAgent } from '@/types/agent';
+import type { Category } from '@/types/agent';
 import type { SortKey } from './sort-control';
 import CategoryFilter from './category-filter';
 import SortControl from './sort-control';
@@ -19,38 +14,23 @@ interface Props {
 }
 
 export default async function AgentListing({ activeCategory, sort }: Props) {
-  const officialAgents = getAllAgents();
   const supabase = createClient();
-
-  const [
-    communityAgents,
-    {
-      data: { user },
-    },
-  ] = await Promise.all([
+  const [allAgents, { data: { user } }] = await Promise.all([
     getApprovedCommunityAgents(supabase),
     supabase.auth.getUser(),
   ]);
 
-  const listed: ListedAgent[] = [
-    ...officialAgents.map((a) => ({ source: 'official' as const, ...a })),
-    ...communityAgents.map((a) => ({ source: 'community' as const, ...a })),
-  ];
-
   const filtered =
     activeCategory === 'all'
-      ? listed
-      : listed.filter((a) => a.category === activeCategory);
+      ? allAgents
+      : allAgents.filter((a) => a.category === activeCategory);
 
-  const targets: VoteTarget[] = filtered.map((a) => ({
-    type: a.source,
-    id: a.source === 'community' ? a.id : a.slug,
-  }));
+  const ids = filtered.map((a) => a.id);
 
   const [voteCounts, votedSet] = await Promise.all([
-    getVoteCountsBatch(supabase, targets),
+    getVoteCountsBatch(supabase, ids),
     user
-      ? getUserVotedSet(supabase, user.id, targets)
+      ? getUserVotedSet(supabase, user.id, ids)
       : Promise.resolve(new Set<string>()),
   ]);
 
@@ -61,7 +41,7 @@ export default async function AgentListing({ activeCategory, sort }: Props) {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <CategoryFilter
           activeCategory={activeCategory}
-          agents={listed}
+          agents={allAgents}
           currentSort={sort}
         />
         <SortControl active={sort} currentCategory={activeCategory} />
