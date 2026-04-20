@@ -41,6 +41,12 @@ export default async function Header() {
             Agents
           </Link>
           <Link
+            href="/leaderboard"
+            className="px-3 h-8 hidden sm:flex items-center text-[13px] font-medium text-text-secondary hover:text-text-primary transition-colors rounded-md"
+          >
+            Leaderboard
+          </Link>
+          <Link
             href="/submit"
             className="px-3 h-8 flex items-center text-[13px] font-medium text-text-secondary hover:text-text-primary transition-colors rounded-md"
           >

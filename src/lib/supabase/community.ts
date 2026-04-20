@@ -156,6 +156,20 @@ export async function getUserSubmissions(
   return (data ?? []).map(rowToAgent);
 }
 
+export async function getAgentsByIds(
+  supabase: SupabaseClient,
+  ids: string[]
+): Promise<CommunityAgent[]> {
+  if (ids.length === 0) return [];
+  const { data } = await supabase
+    .from('community_agents')
+    .select(COLUMNS)
+    .in('id', ids)
+    .eq('status', 'approved')
+    .is('deleted_at', null);
+  return (data ?? []).map(rowToAgent);
+}
+
 export async function getUserBookmarkedSet(
   supabase: SupabaseClient,
   userId: string
