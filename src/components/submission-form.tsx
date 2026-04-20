@@ -207,17 +207,17 @@ export default function SubmissionForm() {
         </div>
       )}
 
-      <div className="flex items-center gap-4 pt-2">
-        <button
-          type="submit"
-          disabled={pending}
-          className="inline-flex items-center h-9 px-4 text-[13px] font-medium text-white bg-accent-brand hover:bg-accent-hover rounded-full transition-colors disabled:opacity-60"
-        >
-          {pending ? 'Submitting...' : 'Submit for review'}
-        </button>
+      <div className="flex items-center justify-between gap-4 pt-2 flex-wrap">
         <p className="text-text-muted text-xs">
           We review every agent before it goes public. Usually within 48 hours.
         </p>
+        <button
+          type="submit"
+          disabled={pending}
+          className="inline-flex items-center h-9 px-4 text-[13px] font-medium text-white bg-accent-brand hover:bg-accent-hover rounded-full transition-colors disabled:opacity-60 ml-auto"
+        >
+          {pending ? 'Submitting...' : 'Submit for review'}
+        </button>
       </div>
 
       <style jsx>{`
