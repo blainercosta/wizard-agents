@@ -1,4 +1,19 @@
-export type Category = 'design' | 'development' | 'automation' | 'writing' | 'business' | 'marketing';
+// Category is now a free-form string slug. Authors can propose new ones via
+// the submit form; admins accept them implicitly by approving the agent.
+export type Category = string;
+
+export const DEFAULT_CATEGORY_SLUGS = [
+  'design',
+  'development',
+  'automation',
+  'writing',
+  'business',
+  'marketing',
+] as const;
+
+export function isDefaultCategory(slug: string): boolean {
+  return (DEFAULT_CATEGORY_SLUGS as readonly string[]).includes(slug);
+}
 
 export interface CommunityAuthor {
   username: string;
@@ -11,6 +26,7 @@ export interface CommunityAgent {
   name: string;
   description: string;
   category: Category;
+  categoryLabel: string | null;
   version: string;
   tags: string[];
   content: string;
@@ -30,17 +46,7 @@ export function isCurated(agent: CommunityAgent): boolean {
   return CURATOR_USERNAMES.has(agent.author.username);
 }
 
-export const CATEGORIES: { value: Category | 'all'; label: string }[] = [
-  { value: 'all', label: 'All' },
-  { value: 'design', label: 'Design' },
-  { value: 'development', label: 'Dev' },
-  { value: 'automation', label: 'Automation' },
-  { value: 'writing', label: 'Writing' },
-  { value: 'business', label: 'Business' },
-  { value: 'marketing', label: 'Marketing' },
-];
-
-export const CATEGORY_LABELS: Record<Category, string> = {
+export const DEFAULT_CATEGORY_LABELS: Record<string, string> = {
   design: 'Design',
   development: 'Dev',
   automation: 'Automation',
@@ -48,3 +54,12 @@ export const CATEGORY_LABELS: Record<Category, string> = {
   business: 'Business',
   marketing: 'Marketing',
 };
+
+export const DEFAULT_CATEGORY_OPTIONS: { value: string; label: string }[] = [
+  { value: 'design', label: 'Design' },
+  { value: 'development', label: 'Dev' },
+  { value: 'automation', label: 'Automation' },
+  { value: 'writing', label: 'Writing' },
+  { value: 'business', label: 'Business' },
+  { value: 'marketing', label: 'Marketing' },
+];

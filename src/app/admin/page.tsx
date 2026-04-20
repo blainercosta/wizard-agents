@@ -150,7 +150,7 @@ function HistoryCard({
               v{agent.version}
             </span>
             <span className="inline-flex items-center h-5 px-2 text-[10px] font-medium text-accent-lilac border border-accent-lilac/40 rounded-full">
-              {getCategoryLabel(agent.category)}
+              {getCategoryLabel(agent.category, agent.categoryLabel)}
             </span>
             <span
               className={`inline-flex items-center h-5 px-2 text-[10px] font-medium rounded-full border ${

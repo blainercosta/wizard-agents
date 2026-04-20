@@ -99,7 +99,7 @@ export default function AgentCard({
         </div>
 
         <div className="text-xs text-text-muted mb-3">
-          v{agent.version} · {getCategoryLabel(agent.category)}
+          v{agent.version} · {getCategoryLabel(agent.category, agent.categoryLabel)}
         </div>
 
         <p className="text-[13px] leading-relaxed text-text-secondary mb-4 line-clamp-3 flex-1">
@@ -153,13 +153,13 @@ export default function AgentCard({
         <div className="flex gap-2 mt-auto">
           <button
             onClick={handleCopy}
-            className="flex-1 inline-flex items-center justify-center h-8 px-3 text-[13px] font-medium text-white bg-accent-brand hover:bg-accent-hover rounded-md transition-colors"
+            className="flex-1 inline-flex items-center justify-center h-8 px-3 text-[13px] font-medium text-white bg-accent-brand hover:bg-accent-hover rounded-full transition-colors"
           >
             {copied ? 'Copied' : 'Copy prompt'}
           </button>
           <button
             onClick={handleDownload}
-            className="flex-1 inline-flex items-center justify-center h-8 px-3 text-[13px] font-medium text-text-secondary bg-white/[0.02] border border-border rounded-md hover:bg-white/[0.05] hover:text-text-primary transition-colors"
+            className="flex-1 inline-flex items-center justify-center h-8 px-3 text-[13px] font-medium text-text-secondary bg-white/[0.02] border border-border rounded-full hover:bg-white/[0.05] hover:text-text-primary transition-colors"
           >
             Download
           </button>

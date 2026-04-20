@@ -13,7 +13,7 @@ function SkeletonCard() {
     <div className="bg-white/[0.02] border border-border rounded-lg p-5 flex flex-col gap-3">
       <div className="flex items-start justify-between gap-2 mb-1">
         <div className="h-[18px] w-32 rounded bg-white/[0.04] animate-pulse" />
-        <div className="h-7 w-12 rounded-md bg-white/[0.04] animate-pulse" />
+        <div className="h-7 w-12 rounded-full bg-white/[0.04] animate-pulse" />
       </div>
       <div className="h-3 w-24 rounded bg-white/[0.04] animate-pulse" />
       <div className="space-y-1.5 mb-1">
@@ -22,8 +22,8 @@ function SkeletonCard() {
         <div className="h-3 w-2/3 rounded bg-white/[0.04] animate-pulse" />
       </div>
       <div className="mt-auto flex gap-2">
-        <div className="h-8 flex-1 rounded-md bg-white/[0.04] animate-pulse" />
-        <div className="h-8 flex-1 rounded-md bg-white/[0.04] animate-pulse" />
+        <div className="h-8 flex-1 rounded-full bg-white/[0.04] animate-pulse" />
+        <div className="h-8 flex-1 rounded-full bg-white/[0.04] animate-pulse" />
       </div>
     </div>
   );

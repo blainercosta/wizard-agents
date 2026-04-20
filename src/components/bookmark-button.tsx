@@ -53,7 +53,7 @@ export default function BookmarkButton({
         aria-pressed={bookmarked}
         aria-label={bookmarked ? 'Remove from saved' : 'Save for later'}
         title={bookmarked ? 'Saved' : 'Save for later'}
-        className={`inline-flex items-center justify-center h-7 w-7 rounded-md border transition-colors disabled:opacity-60 ${
+        className={`inline-flex items-center justify-center h-7 w-7 rounded-full border transition-colors disabled:opacity-60 ${
           bookmarked
             ? 'bg-accent-brand/15 border-accent-brand/40 text-accent-hover'
             : 'bg-white/[0.02] border-border text-text-secondary hover:bg-white/[0.05] hover:text-text-primary'

@@ -37,7 +37,7 @@ export default function AuthButtons({ user }: Props) {
       <button
         onClick={handleLogin}
         disabled={loading}
-        className="inline-flex items-center gap-2 h-8 px-3 text-[13px] font-medium text-white bg-accent-brand hover:bg-accent-hover rounded-md transition-colors disabled:opacity-60 disabled:cursor-wait"
+        className="inline-flex items-center gap-2 h-8 px-3 text-[13px] font-medium text-white bg-accent-brand hover:bg-accent-hover rounded-full transition-colors disabled:opacity-60 disabled:cursor-wait"
       >
         <Github className="w-3.5 h-3.5" />
         {loading ? 'Signing in...' : 'Sign in'}
@@ -62,7 +62,7 @@ export default function AuthButtons({ user }: Props) {
       <button
         onClick={handleLogout}
         disabled={loading}
-        className="inline-flex items-center h-8 px-3 text-[13px] font-medium text-text-secondary bg-white/[0.02] border border-border rounded-md hover:bg-white/[0.05] hover:text-text-primary transition-colors disabled:opacity-60"
+        className="inline-flex items-center h-8 px-3 text-[13px] font-medium text-text-secondary bg-white/[0.02] border border-border rounded-full hover:bg-white/[0.05] hover:text-text-primary transition-colors disabled:opacity-60"
       >
         {loading ? '...' : 'Sign out'}
       </button>

@@ -123,7 +123,7 @@ function SubmissionItem({ submission: s }: { submission: CommunityAgent }) {
               {statusLabel}
             </span>
             <span className="inline-flex items-center h-5 px-2 text-[10px] font-medium text-accent-lilac border border-accent-lilac/40 rounded-full">
-              {getCategoryLabel(s.category)}
+              {getCategoryLabel(s.category, s.categoryLabel)}
             </span>
           </div>
           <div className="text-xs text-text-muted">

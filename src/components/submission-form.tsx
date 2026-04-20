@@ -4,7 +4,9 @@ import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { slugify } from '@/lib/utils';
-import { CATEGORIES, type Category } from '@/types/agent';
+import { DEFAULT_CATEGORY_OPTIONS } from '@/types/agent';
+
+const OTHER_VALUE = '__other__';
 
 export default function SubmissionForm() {
   const router = useRouter();
@@ -14,7 +16,8 @@ export default function SubmissionForm() {
 
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
-  const [category, setCategory] = useState<Category>('development');
+  const [categoryChoice, setCategoryChoice] = useState<string>('development');
+  const [customCategory, setCustomCategory] = useState('');
   const [tagsInput, setTagsInput] = useState('');
   const [content, setContent] = useState('');
   const [version, setVersion] = useState('1.0');
@@ -25,15 +28,25 @@ export default function SubmissionForm() {
     .map((t) => t.trim())
     .filter(Boolean);
 
+  const isOther = categoryChoice === OTHER_VALUE;
+  const customCategorySlug = isOther ? slugify(customCategory) : '';
+
   function validate(): string | null {
     if (!name.trim()) return 'Name is required.';
     if (!slug) return 'Name must contain valid characters for a slug.';
     if (!description.trim()) return 'Description is required.';
     if (description.length > 280)
       return 'Description must be 280 characters or less.';
-    if (!content.trim()) return 'Prompt content is required.';
+    if (isOther) {
+      if (!customCategory.trim()) return 'Enter a name for your new category.';
+      if (!customCategorySlug)
+        return 'Category name must contain valid characters.';
+      if (customCategory.length > 40)
+        return 'Category name must be 40 characters or less.';
+    }
+    if (!content.trim()) return 'Prompt is required.';
     if (content.length < 50)
-      return 'Prompt content must be at least 50 characters.';
+      return 'Prompt must be at least 50 characters.';
     return null;
   }
 
@@ -47,6 +60,9 @@ export default function SubmissionForm() {
       return;
     }
 
+    const resolvedCategory = isOther ? customCategorySlug : categoryChoice;
+    const resolvedLabel = isOther ? customCategory.trim() : null;
+
     startTransition(async () => {
       const { data, error: rpcError } = await supabase.rpc(
         'submit_community_agent',
@@ -54,10 +70,11 @@ export default function SubmissionForm() {
           p_slug: slug,
           p_name: name.trim(),
           p_description: description.trim(),
-          p_category: category,
+          p_category: resolvedCategory,
           p_tags: tags,
           p_content: content,
           p_version: version || '1.0',
+          p_category_label: resolvedLabel,
         }
       );
 
@@ -75,8 +92,6 @@ export default function SubmissionForm() {
       router.push(`/submit/success?id=${data}`);
     });
   }
-
-  const selectableCategories = CATEGORIES.filter((c) => c.value !== 'all');
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
@@ -103,18 +118,40 @@ export default function SubmissionForm() {
       </Field>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-        <Field label="Category">
+        <Field
+          label="Category"
+          hint={isOther ? 'Proposed categories are reviewed with your agent.' : undefined}
+        >
           <select
-            value={category}
-            onChange={(e) => setCategory(e.target.value as Category)}
+            value={categoryChoice}
+            onChange={(e) => setCategoryChoice(e.target.value)}
             className="input"
           >
-            {selectableCategories.map((c) => (
+            {DEFAULT_CATEGORY_OPTIONS.map((c) => (
               <option key={c.value} value={c.value}>
                 {c.label}
               </option>
             ))}
+            <option value={OTHER_VALUE}>Other — propose a new category</option>
           </select>
+          {isOther && (
+            <input
+              type="text"
+              value={customCategory}
+              onChange={(e) => setCustomCategory(e.target.value)}
+              placeholder="e.g. Research, Data, AI/ML"
+              maxLength={40}
+              className="input mt-2"
+            />
+          )}
+          {isOther && customCategorySlug && (
+            <div className="text-xs text-text-muted mt-1.5">
+              Slug:{' '}
+              <span className="font-mono text-text-secondary">
+                /{customCategorySlug}
+              </span>
+            </div>
+          )}
         </Field>
 
         <Field label="Version">
@@ -174,7 +211,7 @@ export default function SubmissionForm() {
         <button
           type="submit"
           disabled={pending}
-          className="inline-flex items-center h-9 px-4 text-[13px] font-medium text-white bg-accent-brand hover:bg-accent-hover rounded-md transition-colors disabled:opacity-60"
+          className="inline-flex items-center h-9 px-4 text-[13px] font-medium text-white bg-accent-brand hover:bg-accent-hover rounded-full transition-colors disabled:opacity-60"
         >
           {pending ? 'Submitting...' : 'Submit for review'}
         </button>

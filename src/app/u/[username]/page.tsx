@@ -136,7 +136,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
                 href={`https://github.com/${profile.username}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 h-7 px-2.5 text-xs font-medium text-text-secondary bg-white/[0.02] border border-border rounded-md hover:bg-white/[0.05] hover:text-text-primary transition-colors"
+                className="inline-flex items-center gap-1.5 h-7 px-2.5 text-xs font-medium text-text-secondary bg-white/[0.02] border border-border rounded-full hover:bg-white/[0.05] hover:text-text-primary transition-colors"
               >
                 <Github className="w-3.5 h-3.5" />
                 View on GitHub

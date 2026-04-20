@@ -71,7 +71,7 @@ export default function UpvoteButton({
         disabled={pending}
         aria-pressed={voted}
         aria-label={voted ? 'Remove upvote' : 'Upvote'}
-        className={`inline-flex items-center ${dims} font-medium rounded-md border transition-colors disabled:opacity-60 ${
+        className={`inline-flex items-center ${dims} font-medium rounded-full border transition-colors disabled:opacity-60 ${
           voted
             ? 'bg-accent-brand/15 border-accent-brand/40 text-accent-hover'
             : 'bg-white/[0.02] border-border text-text-secondary hover:bg-white/[0.05] hover:text-text-primary'
