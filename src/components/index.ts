@@ -15,3 +15,4 @@ export { default as SortControl, type SortKey } from './sort-control';
 export { default as SkeletonGrid, ListingSkeleton, StatsSkeleton } from './skeleton-grid';
 export { default as AgentListing } from './agent-listing';
 export { default as HeroStats } from './hero-stats';
+export { default as VerifiedBadge } from './verified-badge';
