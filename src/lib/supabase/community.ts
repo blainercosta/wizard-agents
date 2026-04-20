@@ -1,6 +1,8 @@
 import { cache } from 'react';
+import { unstable_cache } from 'next/cache';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Category, CommunityAgent } from '@/types/agent';
+import { publicSupabase } from './public';
 
 type Row = {
   id: string;
@@ -67,8 +69,7 @@ function rowToAgent(row: Row): CommunityAgent {
 const COLUMNS =
   'id, slug, name, description, category, category_label, version, tags, content, status, rejection_reason, user_id, author_username, author_avatar_url, created_at, updated_at';
 
-// React.cache dedupes across components within the same request, so the
-// home page (HeroStats + AgentListing) only hits Supabase once per render.
+// React.cache dedupes across components within the same request.
 export const getApprovedCommunityAgents = cache(
   async (supabase: SupabaseClient): Promise<CommunityAgent[]> => {
     const { data } = await supabase
@@ -80,6 +81,25 @@ export const getApprovedCommunityAgents = cache(
 
     return (data ?? []).map(rowToAgent);
   }
+);
+
+// Cross-request cache for the public listing: 60s revalidate. Reduces
+// mobile TTFB from ~800ms (Supabase roundtrip) to edge-cache hit. Uses
+// the anon client so it works outside request context.
+// Trade-off: admin approval takes up to 60s to appear publicly.
+export const getCachedApprovedAgents = unstable_cache(
+  async (): Promise<CommunityAgent[]> => {
+    const { data } = await publicSupabase
+      .from('community_agents')
+      .select(COLUMNS)
+      .eq('status', 'approved')
+      .is('deleted_at', null)
+      .order('created_at', { ascending: false });
+
+    return (data ?? []).map(rowToAgent);
+  },
+  ['approved-community-agents'],
+  { revalidate: 60, tags: ['community-agents'] }
 );
 
 export async function getCommunityAgentBySlug(
