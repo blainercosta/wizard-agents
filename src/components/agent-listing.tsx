@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import {
-  getApprovedCommunityAgents,
+  getCachedApprovedAgents,
   getUserBookmarkedSet,
 } from '@/lib/supabase/community';
 import { getVoteCountsBatch, getUserVotedSet } from '@/lib/supabase/votes';
@@ -19,7 +19,7 @@ interface Props {
 export default async function AgentListing({ activeCategory, sort }: Props) {
   const supabase = createClient();
   const [allAgents, { data: { user } }] = await Promise.all([
-    getApprovedCommunityAgents(supabase),
+    getCachedApprovedAgents(),
     supabase.auth.getUser(),
   ]);
 
