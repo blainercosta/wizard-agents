@@ -4,6 +4,7 @@ import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { slugify } from '@/lib/utils';
+import { track } from '@/lib/analytics';
 import { DEFAULT_CATEGORY_OPTIONS } from '@/types/agent';
 
 const OTHER_VALUE = '__other__';
@@ -59,6 +60,8 @@ export default function SubmissionForm() {
       setError(v);
       return;
     }
+
+    track('submit_submitted', {});
 
     const resolvedCategory = isOther ? customCategorySlug : categoryChoice;
     const resolvedLabel = isOther ? customCategory.trim() : null;

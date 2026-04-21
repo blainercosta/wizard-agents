@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Github } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
+import { track } from '@/lib/analytics';
 
 type Props = {
   next?: string;
@@ -22,6 +23,7 @@ export default function SignInWithGithubButton({
 
   async function handleClick() {
     setLoading(true);
+    track('sign_in_started', { source: next });
     await supabase.auth.signInWithOAuth({
       provider: 'github',
       options: {

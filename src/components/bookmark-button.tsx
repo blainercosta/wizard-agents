@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react';
 import { Bookmark } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
+import { track } from '@/lib/analytics';
 import SignInPopover from './sign-in-popover';
 
 type Props = {
@@ -41,7 +42,10 @@ export default function BookmarkButton({
       if (error) {
         setBookmarked(!next);
         console.error('Bookmark failed:', error.message);
+        return;
       }
+
+      track('bookmark_toggled', { agent_id: agentId, bookmarked: next });
     });
   }
 

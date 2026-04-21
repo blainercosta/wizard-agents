@@ -3,12 +3,14 @@
 import { useState } from 'react';
 import { Copy, Check } from 'lucide-react';
 import { copyToClipboard } from '@/lib/utils';
+import { track } from '@/lib/analytics';
 
 interface CopyButtonProps {
   content: string;
   className?: string;
   label?: string;
   copiedLabel?: string;
+  trackAgent?: { id: string; slug: string; source: 'grid' | 'detail' };
 }
 
 export default function CopyButton({
@@ -16,12 +18,20 @@ export default function CopyButton({
   className = '',
   label = 'Copy',
   copiedLabel = 'Copied',
+  trackAgent,
 }: CopyButtonProps) {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = async () => {
     const success = await copyToClipboard(content);
     if (success) {
+      if (trackAgent) {
+        track('agent_copied', {
+          agent_id: trackAgent.id,
+          agent_slug: trackAgent.slug,
+          source: trackAgent.source,
+        });
+      }
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     }

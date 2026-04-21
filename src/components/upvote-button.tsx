@@ -4,6 +4,7 @@ import { useState, useTransition } from 'react';
 import { ChevronUp } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { VOTE_TARGET_TYPE } from '@/lib/supabase/votes';
+import { track } from '@/lib/analytics';
 import SignInPopover from './sign-in-popover';
 
 type Props = {
@@ -57,7 +58,12 @@ export default function UpvoteButton({
         setVoted(!nextVoted);
         setCount(count);
         console.error('Vote failed:', error.message);
+        return;
       }
+
+      track(nextVoted ? 'agent_upvoted' : 'agent_upvote_removed', {
+        agent_id: targetId,
+      });
     });
   }
 
