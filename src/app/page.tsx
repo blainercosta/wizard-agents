@@ -43,7 +43,7 @@ export default function Home({
               Browse agents
             </LinkButton>
             <LinkButton href="/submit" variant="primary" size="lg">
-              Submit yours →
+              Submit yours
             </LinkButton>
           </div>
         </section>
