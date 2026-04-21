@@ -1,40 +1,15 @@
 export default function WizardLogo({ className = '' }: { className?: string }) {
   return (
     <svg
-      viewBox="0 0 32 32"
+      viewBox="0 0 75 68"
       className={className}
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
     >
-      {/* Wizard Hat */}
-      <rect x="14" y="2" width="4" height="2" fill="#A78BFA" />
-      <rect x="12" y="4" width="8" height="2" fill="#A78BFA" />
-      <rect x="10" y="6" width="12" height="2" fill="#A78BFA" />
-      <rect x="8" y="8" width="16" height="2" fill="#A78BFA" />
-      <rect x="6" y="10" width="20" height="2" fill="#A78BFA" />
-
-      {/* Hat Brim */}
-      <rect x="4" y="12" width="24" height="2" fill="#7C3AED" />
-
-      {/* Star on Hat */}
-      <rect x="14" y="6" width="2" height="2" fill="#39FF14" />
-      <rect x="12" y="8" width="2" height="2" fill="#39FF14" />
-      <rect x="16" y="8" width="2" height="2" fill="#39FF14" />
-
-      {/* Face */}
-      <rect x="10" y="14" width="12" height="8" fill="#E8D5B7" />
-
-      {/* Eyes */}
-      <rect x="12" y="16" width="2" height="2" fill="#1A1625" />
-      <rect x="18" y="16" width="2" height="2" fill="#1A1625" />
-
-      {/* Beard */}
-      <rect x="10" y="22" width="12" height="2" fill="#B8B5C4" />
-      <rect x="8" y="24" width="16" height="2" fill="#B8B5C4" />
-      <rect x="10" y="26" width="4" height="2" fill="#B8B5C4" />
-      <rect x="18" y="26" width="4" height="2" fill="#B8B5C4" />
-      <rect x="12" y="28" width="2" height="2" fill="#B8B5C4" />
-      <rect x="18" y="28" width="2" height="2" fill="#B8B5C4" />
+      <path
+        d="M37.4289 44.2857L64.8574 58L37.4289 10L10.0003 58L37.4289 44.2857Z"
+        fill="currentColor"
+      />
     </svg>
   );
 }
