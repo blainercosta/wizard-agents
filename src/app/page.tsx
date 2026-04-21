@@ -33,10 +33,14 @@ export default async function Home({
   const gated = !user;
 
   return (
-    <div className="min-h-screen flex flex-col bg-background-primary">
+    <div
+      className={`flex flex-col bg-background-primary ${
+        gated ? 'h-screen overflow-hidden' : 'min-h-screen'
+      }`}
+    >
       <Header />
 
-      <main className={`flex-1 ${gated ? 'pb-56' : ''}`}>
+      <main className="flex-1">
         <section className="max-w-6xl mx-auto px-6 pt-20 pb-14">
           <h1 className="text-4xl md:text-5xl font-medium text-text-primary tracking-display leading-tight mb-5">
             <span className="block">Prompts for Claude Code</span>
