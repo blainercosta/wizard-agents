@@ -27,7 +27,7 @@ export default async function Header() {
     <header className="sticky top-0 z-40 bg-background-secondary/80 backdrop-blur border-b border-border-subtle">
       <div className="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2.5 group">
-          <WizardLogo className="w-7 h-7" />
+          <WizardLogo className="w-7 h-7 text-text-primary" />
           <span className="text-[13px] font-medium text-text-primary tracking-tight">
             Wizard Agents
           </span>
