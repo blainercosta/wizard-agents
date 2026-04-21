@@ -1,8 +1,12 @@
 import Link from 'next/link';
 import WizardLogo from './wizard-logo';
-import AuthButtons from './auth-buttons';
+import UserMenu from './user-menu';
+import AdminNotificationBell from './admin-notification-bell';
 import { createClient } from '@/lib/supabase/server';
-import { isCurrentUserAdmin } from '@/lib/supabase/community';
+import {
+  isCurrentUserAdmin,
+  getPendingCommunityAgents,
+} from '@/lib/supabase/community';
 
 export default async function Header() {
   const supabase = createClient();
@@ -22,6 +26,16 @@ export default async function Header() {
         avatarUrl: (user.user_metadata?.avatar_url as string | undefined) ?? null,
       }
     : null;
+
+  const pendingForAdmin = isAdmin
+    ? (await getPendingCommunityAgents(supabase)).map((a) => ({
+        id: a.id,
+        name: a.name,
+        slug: a.slug,
+        authorUsername: a.author.username,
+        createdAt: a.created,
+      }))
+    : [];
 
   return (
     <header className="sticky top-0 z-40 bg-background-secondary/80 backdrop-blur border-b border-border-subtle">
@@ -52,40 +66,10 @@ export default async function Header() {
           >
             Submit
           </Link>
-          {user && (
-            <>
-              <Link
-                href="/saved"
-                className="px-3 h-8 hidden md:flex items-center text-[13px] font-medium text-text-secondary hover:text-text-primary transition-colors rounded-md"
-              >
-                Saved
-              </Link>
-              <Link
-                href="/submissions"
-                className="px-3 h-8 hidden md:flex items-center text-[13px] font-medium text-text-secondary hover:text-text-primary transition-colors rounded-md"
-              >
-                Your submissions
-              </Link>
-            </>
-          )}
-          {isAdmin && (
-            <Link
-              href="/admin"
-              className="px-3 h-8 flex items-center text-[13px] font-medium text-accent-lilac hover:text-accent-hover transition-colors rounded-md"
-            >
-              Admin
-            </Link>
-          )}
-          <Link
-            href="https://github.com/blainercosta/repo-wizard"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="px-3 h-8 hidden sm:flex items-center text-[13px] font-medium text-text-secondary hover:text-text-primary transition-colors rounded-md"
-          >
-            GitHub
-          </Link>
-          <div className="ml-2">
-            <AuthButtons user={authUser} />
+
+          <div className="ml-2 flex items-center gap-1">
+            {isAdmin && <AdminNotificationBell pendingAgents={pendingForAdmin} />}
+            <UserMenu user={authUser} />
           </div>
         </nav>
       </div>
