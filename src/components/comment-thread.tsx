@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { Check, Heart, MessageCircleReply, Trash2, X } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { formatDate } from '@/lib/utils';
+import { track } from '@/lib/analytics';
 import type { AgentComment } from '@/lib/supabase/comments';
 import SignInWithGithubButton from './sign-in-github-button';
 
@@ -74,6 +75,7 @@ export default function CommentThread({
       const optimistic: AgentComment = buildOptimistic(newId, user, body.trim());
       setComments((prev) => [optimistic, ...prev]);
       setBody('');
+      track('comment_posted', { agent_id: agentId, is_reply: false });
     });
   }
 
@@ -115,6 +117,7 @@ export default function CommentThread({
             c.id === parentId ? { ...c, replies: [...c.replies, optimistic] } : c
           )
         );
+        track('comment_posted', { agent_id: agentId, is_reply: true });
         resolve(true);
       });
     });

@@ -15,6 +15,7 @@ import {
 import UpvoteButton from './upvote-button';
 import BookmarkButton from './bookmark-button';
 import VerifiedBadge from './verified-badge';
+import { track } from '@/lib/analytics';
 
 interface AgentCardProps {
   agent: CommunityAgent;
@@ -40,6 +41,11 @@ export default function AgentCard({
     e.stopPropagation();
     const success = await copyToClipboard(agent.rawContent);
     if (success) {
+      track('agent_copied', {
+        agent_id: agent.id,
+        agent_slug: agent.slug,
+        source: 'grid',
+      });
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     }
@@ -48,6 +54,11 @@ export default function AgentCard({
   const handleDownload = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    track('agent_downloaded', {
+      agent_id: agent.id,
+      agent_slug: agent.slug,
+      source: 'grid',
+    });
     downloadFile(agent.rawContent, `${agent.slug}.md`);
   };
 

@@ -2,12 +2,14 @@
 
 import { Download } from 'lucide-react';
 import { downloadFile } from '@/lib/utils';
+import { track } from '@/lib/analytics';
 
 interface DownloadButtonProps {
   content: string;
   filename: string;
   className?: string;
   label?: string;
+  trackAgent?: { id: string; slug: string; source: 'grid' | 'detail' };
 }
 
 export default function DownloadButton({
@@ -15,8 +17,16 @@ export default function DownloadButton({
   filename,
   className = '',
   label = 'Download .md',
+  trackAgent,
 }: DownloadButtonProps) {
   const handleDownload = () => {
+    if (trackAgent) {
+      track('agent_downloaded', {
+        agent_id: trackAgent.id,
+        agent_slug: trackAgent.slug,
+        source: trackAgent.source,
+      });
+    }
     downloadFile(content, filename);
   };
 

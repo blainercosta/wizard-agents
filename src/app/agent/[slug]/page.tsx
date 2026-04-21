@@ -196,12 +196,14 @@ export default async function AgentPage({ params, searchParams }: AgentPageProps
               content={agent.rawContent}
               label="Copy prompt"
               copiedLabel="Copied"
+              trackAgent={{ id: agent.id, slug: agent.slug, source: 'detail' }}
               className="h-9 px-4 text-text-primary bg-accent-brand hover:bg-accent-hover rounded-full"
             />
             <DownloadButton
               content={agent.rawContent}
               filename={`${agent.slug}.md`}
               label="Download"
+              trackAgent={{ id: agent.id, slug: agent.slug, source: 'detail' }}
               className="h-9 px-4 text-text-secondary bg-white/[0.02] border border-border hover:bg-white/[0.05] hover:text-text-primary rounded-full"
             />
           </div>

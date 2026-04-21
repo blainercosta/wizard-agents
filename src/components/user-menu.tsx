@@ -5,6 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Github, LogOut, User, Inbox, Bookmark } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
+import { track } from '@/lib/analytics';
 
 type Props = {
   user: {
@@ -47,6 +48,7 @@ export default function UserMenu({ user }: Props) {
 
   async function handleLogin() {
     setLoading(true);
+    track('sign_in_started', { source: 'header' });
     await supabase.auth.signInWithOAuth({
       provider: 'github',
       options: {

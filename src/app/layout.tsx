@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
+import { PostHogProvider } from "@/components/posthog-provider";
+import { IdentifyOnAuth } from "@/components/identify-on-auth";
 import "./globals.css";
 
 const inter = Inter({
@@ -29,7 +31,10 @@ export default function RootLayout({
       <body
         className={`${inter.variable} ${jetbrainsMono.variable} font-sans antialiased bg-background-primary text-text-primary`}
       >
-        {children}
+        <PostHogProvider>
+          <IdentifyOnAuth />
+          {children}
+        </PostHogProvider>
       </body>
     </html>
   );
