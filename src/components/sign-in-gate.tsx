@@ -8,14 +8,14 @@ export default function SignInGate({ next = '/' }: { next?: string }) {
     >
       <div className="h-72 bg-gradient-to-b from-transparent to-background-primary" />
       <div className="bg-background-primary pointer-events-auto">
-        <div className="max-w-6xl mx-auto px-6 pt-1 pb-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-center gap-3 bg-white/[0.02] border border-border rounded-xl px-5 py-3">
-            <div className="min-w-0 sm:text-right">
-              <p className="text-[13px] font-medium text-text-primary">
+        <div className="max-w-6xl mx-auto px-6 pt-2 pb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-5 bg-white/[0.02] border border-border rounded-xl px-6 py-5">
+            <div className="min-w-0">
+              <p className="text-[15px] font-medium text-text-primary mb-1">
                 Sign in to browse the full library
               </p>
-              <p className="text-[12px] text-text-muted">
-                Copy, upvote, save. Free with GitHub.
+              <p className="text-[13px] text-text-muted">
+                Copy prompts, upvote, save favorites. Free with GitHub.
               </p>
             </div>
             <SignInWithGithubButton next={next} />
