@@ -6,8 +6,10 @@ import {
   AgentListing,
   ListingSkeleton,
 } from '@/components';
+import SignInGate from '@/components/sign-in-gate';
 import type { Category } from '@/types/agent';
 import { parseSortParam } from '@/lib/utils';
+import { createClient } from '@/lib/supabase/server';
 
 function parseCategoryParam(raw: string | string[] | undefined): Category | 'all' {
   const val = Array.isArray(raw) ? raw[0] : raw;
@@ -16,7 +18,7 @@ function parseCategoryParam(raw: string | string[] | undefined): Category | 'all
   return 'all';
 }
 
-export default function Home({
+export default async function Home({
   searchParams,
 }: {
   searchParams: { category?: string; sort?: string };
@@ -24,11 +26,17 @@ export default function Home({
   const activeCategory = parseCategoryParam(searchParams.category);
   const sort = parseSortParam(searchParams.sort);
 
+  const supabase = createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const gated = !user;
+
   return (
     <div className="min-h-screen flex flex-col bg-background-primary">
       <Header />
 
-      <main className="flex-1">
+      <main className={`flex-1 ${gated ? 'pb-56' : ''}`}>
         <section className="max-w-6xl mx-auto px-6 pt-20 pb-14">
           <h1 className="text-4xl md:text-5xl font-medium text-text-primary tracking-display leading-tight mb-5">
             <span className="block">Prompts for Claude Code</span>
@@ -60,6 +68,8 @@ export default function Home({
       </main>
 
       <Footer />
+
+      {gated && <SignInGate next="/" />}
     </div>
   );
 }
