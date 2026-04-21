@@ -16,6 +16,6 @@ type EventMap = {
 
 export function track<K extends keyof EventMap>(event: K, properties: EventMap[K]) {
   if (typeof window === 'undefined') return;
-  if (!process.env.NEXT_PUBLIC_POSTHOG_KEY) return;
+  if (!process.env.NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN) return;
   posthog.capture(event, properties);
 }

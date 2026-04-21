@@ -6,7 +6,7 @@ import { createClient } from '@/lib/supabase/client';
 
 export function IdentifyOnAuth() {
   useEffect(() => {
-    if (!process.env.NEXT_PUBLIC_POSTHOG_KEY) return;
+    if (!process.env.NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN) return;
     const supabase = createClient();
 
     supabase.auth.getUser().then(({ data: { user } }) => {
