@@ -79,6 +79,21 @@ export async function getAllPromptsForAdmin(
   });
 }
 
+export async function getPromptByIdForAdmin(
+  supabase: SupabaseClient,
+  id: string
+): Promise<(Prompt & { id: string }) | null> {
+  const { data } = await supabase
+    .from('prompts')
+    .select(COLUMNS)
+    .eq('id', id)
+    .maybeSingle();
+
+  if (!data) return null;
+  const row = data as Row;
+  return { ...rowToPrompt(row), id: row.id };
+}
+
 export async function createPrompt(
   supabase: SupabaseClient,
   input: {
@@ -104,6 +119,32 @@ export async function createPrompt(
   });
   if (error) throw error;
   return data as string;
+}
+
+export async function updatePrompt(
+  supabase: SupabaseClient,
+  id: string,
+  input: {
+    title: string;
+    description: string;
+    content: string;
+    format: 'text' | 'json';
+    referenceImageUrl: string | null;
+    referenceImageAlt: string | null;
+    tags: string[];
+  }
+): Promise<void> {
+  const { error } = await supabase.rpc('update_prompt', {
+    p_id: id,
+    p_title: input.title,
+    p_description: input.description,
+    p_content: input.content,
+    p_format: input.format,
+    p_reference_image_url: input.referenceImageUrl,
+    p_reference_image_alt: input.referenceImageAlt,
+    p_tags: input.tags,
+  });
+  if (error) throw error;
 }
 
 export async function deletePrompt(
