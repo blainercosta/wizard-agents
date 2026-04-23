@@ -6,6 +6,11 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'avatars.githubusercontent.com',
       },
+      {
+        protocol: 'https',
+        hostname: 'btazadgvylssbhlrizjh.supabase.co',
+        pathname: '/storage/v1/object/public/**',
+      },
     ],
   },
   async headers() {

@@ -37,9 +37,11 @@ export default function PromptView({ prompt, initialCount }: Props) {
             </p>
           </header>
 
-          <div className="mb-8">
-            <ReferenceImage image={prompt.referenceImage} priority />
-          </div>
+          {prompt.referenceImage?.src && (
+            <div className="mb-8">
+              <ReferenceImage image={prompt.referenceImage} priority />
+            </div>
+          )}
 
           <section
             aria-labelledby="prompt-heading"
