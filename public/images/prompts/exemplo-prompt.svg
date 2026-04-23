@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <rect width="1200" height="630" fill="#08090a"/>
+  <rect x="40" y="40" width="1120" height="550" rx="16" fill="#0f1011" stroke="rgba(255,255,255,0.08)"/>
+  <text x="80" y="140" font-family="Inter, system-ui, sans-serif" font-size="52" font-weight="510" fill="#f7f8f8">Prompt de exemplo</text>
+  <text x="80" y="200" font-family="Inter, system-ui, sans-serif" font-size="22" fill="#d0d6e0">Imagem de referência ilustrativa.</text>
+  <text x="80" y="560" font-family="Inter, system-ui, sans-serif" font-size="18" fill="#8a8f98">prompts.blainercosta.com</text>
+</svg>

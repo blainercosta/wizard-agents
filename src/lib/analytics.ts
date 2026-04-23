@@ -12,6 +12,12 @@ type EventMap = {
   submit_submitted: Record<string, never>;
   sign_in_started: { source: string };
   filter_applied: { category: string; sort: string };
+  prompt_viewed: { slug: string; product: 'prompts' };
+  prompt_copied: { slug: string; format: 'text' | 'json'; product: 'prompts' };
+  prompt_copy_failed: { slug: string; reason: string; product: 'prompts' };
+  community_clicked: { slug: string; product: 'prompts' };
+  mentoria_clicked: { slug: string; product: 'prompts' };
+  social_clicked: { network: 'linkedin' | 'instagram' | 'x'; product: 'prompts' };
 };
 
 export function track<K extends keyof EventMap>(event: K, properties: EventMap[K]) {
