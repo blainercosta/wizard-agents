@@ -3,6 +3,7 @@ import type { I18n } from '@/lib/i18n';
 import CopyCounter from './copy-counter';
 import CopyButton from './copy-button';
 import ReferenceImage from './reference-image';
+import ImageCarousel from './image-carousel';
 import SocialLinks from './social-links';
 import PromptViewTracker from './prompt-view-tracker';
 
@@ -13,6 +14,9 @@ type Props = {
 };
 
 export default function PromptView({ prompt, initialCount, t }: Props) {
+  const singleImage = prompt.images.length === 1 ? prompt.images[0] : null;
+  const multiImage = prompt.images.length > 1 ? prompt.images : null;
+
   return (
     <div className="min-h-screen flex flex-col bg-background-primary">
       <main className="flex-1">
@@ -38,14 +42,22 @@ export default function PromptView({ prompt, initialCount, t }: Props) {
             <div className="mb-4">
               <CopyCounter slug={prompt.slug} initialCount={initialCount} t={t} />
             </div>
-            <p className="text-lg text-text-secondary leading-relaxed">
-              {prompt.description}
-            </p>
+            {prompt.description && (
+              <p className="text-lg text-text-secondary leading-relaxed">
+                {prompt.description}
+              </p>
+            )}
           </header>
 
-          {prompt.referenceImage?.src && (
+          {singleImage && (
             <div className="mb-8">
-              <ReferenceImage image={prompt.referenceImage} priority />
+              <ReferenceImage image={singleImage} priority />
+            </div>
+          )}
+
+          {multiImage && (
+            <div className="mb-8">
+              <ImageCarousel images={multiImage} priority />
             </div>
           )}
 
@@ -65,6 +77,22 @@ export default function PromptView({ prompt, initialCount, t }: Props) {
               {prompt.content}
             </pre>
           </section>
+
+          {prompt.howToUse && (
+            <section aria-labelledby="how-to-use-heading" className="mb-10">
+              <h2
+                id="how-to-use-heading"
+                className="text-xl font-medium text-text-primary tracking-tight mb-3"
+              >
+                {t.howToUseTitle}
+              </h2>
+              <div className="bg-white/[0.02] border border-border rounded-lg p-5">
+                <p className="text-[15px] text-text-secondary leading-relaxed whitespace-pre-wrap">
+                  {prompt.howToUse}
+                </p>
+              </div>
+            </section>
+          )}
 
           <CopyButton
             slug={prompt.slug}

@@ -1,5 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
-import type { Prompt } from '@/types/prompt';
+import type { Prompt, PromptImage } from '@/types/prompt';
 
 type Row = {
   id: string;
@@ -8,8 +8,8 @@ type Row = {
   description: string;
   content: string;
   format: 'text' | 'json';
-  reference_image_url: string | null;
-  reference_image_alt: string | null;
+  images: PromptImage[] | null;
+  how_to_use: string | null;
   tags: string[];
   published_at: string | null;
   created_at: string;
@@ -17,27 +17,21 @@ type Row = {
 };
 
 const COLUMNS =
-  'id, slug, title, description, content, format, reference_image_url, reference_image_alt, tags, published_at, created_at, updated_at';
+  'id, slug, title, description, content, format, images, how_to_use, tags, published_at, created_at, updated_at';
 
 function rowToPrompt(row: Row): Prompt {
   return {
     slug: row.slug,
     title: row.title,
-    description: row.description,
+    description: row.description ?? '',
     content: row.content,
     format: row.format,
-    referenceImage: {
-      src: row.reference_image_url ?? '',
-      alt: row.reference_image_alt ?? '',
-      width: 1200,
-      height: 630,
-    },
+    images: Array.isArray(row.images) ? row.images : [],
+    howToUse: row.how_to_use,
     tags: row.tags ?? [],
     publishedAt: row.published_at ?? row.created_at,
   };
 }
-
-export type AdminPromptRow = Row & { publishedAt: string | null };
 
 export async function getPublishedPromptBySlug(
   supabase: SupabaseClient,
@@ -94,18 +88,20 @@ export async function getPromptByIdForAdmin(
   return { ...rowToPrompt(row), id: row.id };
 }
 
+type PromptInput = {
+  slug: string;
+  title: string;
+  description: string;
+  content: string;
+  format: 'text' | 'json';
+  images: PromptImage[];
+  howToUse: string | null;
+  tags: string[];
+};
+
 export async function createPrompt(
   supabase: SupabaseClient,
-  input: {
-    slug: string;
-    title: string;
-    description: string;
-    content: string;
-    format: 'text' | 'json';
-    referenceImageUrl: string | null;
-    referenceImageAlt: string | null;
-    tags: string[];
-  }
+  input: PromptInput
 ): Promise<string> {
   const { data, error } = await supabase.rpc('create_prompt', {
     p_slug: input.slug,
@@ -113,9 +109,9 @@ export async function createPrompt(
     p_description: input.description,
     p_content: input.content,
     p_format: input.format,
-    p_reference_image_url: input.referenceImageUrl,
-    p_reference_image_alt: input.referenceImageAlt,
+    p_images: input.images,
     p_tags: input.tags,
+    p_how_to_use: input.howToUse,
   });
   if (error) throw error;
   return data as string;
@@ -124,15 +120,7 @@ export async function createPrompt(
 export async function updatePrompt(
   supabase: SupabaseClient,
   id: string,
-  input: {
-    title: string;
-    description: string;
-    content: string;
-    format: 'text' | 'json';
-    referenceImageUrl: string | null;
-    referenceImageAlt: string | null;
-    tags: string[];
-  }
+  input: Omit<PromptInput, 'slug'>
 ): Promise<void> {
   const { error } = await supabase.rpc('update_prompt', {
     p_id: id,
@@ -140,9 +128,9 @@ export async function updatePrompt(
     p_description: input.description,
     p_content: input.content,
     p_format: input.format,
-    p_reference_image_url: input.referenceImageUrl,
-    p_reference_image_alt: input.referenceImageAlt,
+    p_images: input.images,
     p_tags: input.tags,
+    p_how_to_use: input.howToUse,
   });
   if (error) throw error;
 }
@@ -161,7 +149,7 @@ export async function uploadPromptImage(
   file: File
 ): Promise<string> {
   const ext = file.name.split('.').pop()?.toLowerCase() ?? 'png';
-  const path = `${slug}/${Date.now()}.${ext}`;
+  const path = `${slug}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
   const { error } = await supabase.storage
     .from('prompt-images')
     .upload(path, file, { cacheControl: '3600', upsert: false });

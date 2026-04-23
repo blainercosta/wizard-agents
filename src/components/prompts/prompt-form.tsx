@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
-import { Check, Copy, ExternalLink, Upload } from 'lucide-react';
+import { Check, Copy, ExternalLink, Upload, X } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import {
   createPrompt,
@@ -10,13 +10,17 @@ import {
   uploadPromptImage,
 } from '@/lib/supabase/prompts';
 import { slugify, copyToClipboard } from '@/lib/utils';
-import type { Prompt } from '@/types/prompt';
+import type { Prompt, PromptImage } from '@/types/prompt';
 
 type Created = { slug: string; title: string };
 
 type Props = {
   existing?: (Prompt & { id: string }) | null;
 };
+
+type PendingImage =
+  | { kind: 'existing'; url: string; alt: string }
+  | { kind: 'new'; file: File; previewUrl: string; alt: string };
 
 export default function PromptForm({ existing }: Props) {
   const router = useRouter();
@@ -32,10 +36,16 @@ export default function PromptForm({ existing }: Props) {
   const [slugOverride, setSlugOverride] = useState('');
   const [description, setDescription] = useState(existing?.description ?? '');
   const [content, setContent] = useState(existing?.content ?? '');
+  const [howToUse, setHowToUse] = useState(existing?.howToUse ?? '');
   const [format, setFormat] = useState<'text' | 'json'>(existing?.format ?? 'text');
   const [tagsInput, setTagsInput] = useState(existing?.tags.join(', ') ?? '');
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imageAlt, setImageAlt] = useState(existing?.referenceImage?.alt ?? '');
+  const [images, setImages] = useState<PendingImage[]>(
+    existing?.images.map((img) => ({
+      kind: 'existing',
+      url: img.url,
+      alt: img.alt,
+    })) ?? []
+  );
 
   const slug = isEdit
     ? existing!.slug
@@ -47,14 +57,32 @@ export default function PromptForm({ existing }: Props) {
     .split(',')
     .map((t) => t.trim())
     .filter(Boolean);
-  const imagePreview = imageFile
-    ? URL.createObjectURL(imageFile)
-    : existing?.referenceImage?.src || null;
+
+  function addFiles(files: FileList | null) {
+    if (!files) return;
+    const next: PendingImage[] = [];
+    for (const f of Array.from(files)) {
+      next.push({
+        kind: 'new',
+        file: f,
+        previewUrl: URL.createObjectURL(f),
+        alt: '',
+      });
+    }
+    setImages((prev) => [...prev, ...next]);
+  }
+
+  function removeImage(index: number) {
+    setImages((prev) => prev.filter((_, i) => i !== index));
+  }
+
+  function updateAlt(index: number, alt: string) {
+    setImages((prev) => prev.map((img, i) => (i === index ? { ...img, alt } : img)));
+  }
 
   function validate(): string | null {
     if (!title.trim()) return 'Title is required.';
     if (!slug) return 'Slug could not be derived — provide an override.';
-    if (!description.trim()) return 'Description is required.';
     if (description.length > 280) return 'Description must be 280 chars or less.';
     if (!content.trim()) return 'Content is required.';
     if (format === 'json') {
@@ -64,8 +92,10 @@ export default function PromptForm({ existing }: Props) {
         return 'Content does not parse as JSON.';
       }
     }
-    if (imageFile && !imageAlt.trim()) {
-      return 'Alt text required when an image is provided.';
+    for (const img of images) {
+      if (!img.alt.trim()) {
+        return 'Every image needs alt text.';
+      }
     }
     return null;
   }
@@ -82,35 +112,33 @@ export default function PromptForm({ existing }: Props) {
 
     startTransition(async () => {
       try {
-        let imageUrl: string | null = existing?.referenceImage?.src || null;
-        if (imageFile) {
-          imageUrl = await uploadPromptImage(supabase, slug, imageFile);
+        const finalImages: PromptImage[] = [];
+        for (const img of images) {
+          if (img.kind === 'existing') {
+            finalImages.push({ url: img.url, alt: img.alt });
+          } else {
+            const url = await uploadPromptImage(supabase, slug, img.file);
+            finalImages.push({ url, alt: img.alt });
+          }
         }
 
+        const payload = {
+          title: title.trim(),
+          description: description.trim(),
+          content,
+          format,
+          images: finalImages,
+          howToUse: howToUse.trim() || null,
+          tags,
+        };
+
         if (isEdit) {
-          await updatePrompt(supabase, existing!.id, {
-            title: title.trim(),
-            description: description.trim(),
-            content,
-            format,
-            referenceImageUrl: imageUrl,
-            referenceImageAlt: imageAlt.trim() || null,
-            tags,
-          });
+          await updatePrompt(supabase, existing!.id, payload);
           setSavedOk(true);
           router.refresh();
           setTimeout(() => setSavedOk(false), 2500);
         } else {
-          await createPrompt(supabase, {
-            slug,
-            title: title.trim(),
-            description: description.trim(),
-            content,
-            format,
-            referenceImageUrl: imageUrl,
-            referenceImageAlt: imageAlt.trim() || null,
-            tags,
-          });
+          await createPrompt(supabase, { slug, ...payload });
           setCreated({ slug, title: title.trim() });
         }
       } catch (err) {
@@ -158,7 +186,7 @@ export default function PromptForm({ existing }: Props) {
         </Field>
       )}
 
-      <Field label="Description" hint={`${description.length}/280`}>
+      <Field label="Description (optional)" hint={`${description.length}/280`}>
         <textarea
           value={description}
           onChange={(e) => setDescription(e.target.value)}
@@ -208,7 +236,20 @@ export default function PromptForm({ existing }: Props) {
         />
       </Field>
 
-      <Field label="Tags" hint="Comma separated">
+      <Field
+        label="How to use (optional)"
+        hint="Step-by-step guide shown below the prompt."
+      >
+        <textarea
+          value={howToUse}
+          onChange={(e) => setHowToUse(e.target.value)}
+          rows={6}
+          className="input resize-y"
+          placeholder={`1. Abre o ChatGPT/Claude.\n2. Cola o prompt acima.\n3. Dá o contexto específico.`}
+        />
+      </Field>
+
+      <Field label="Tags (optional)" hint="Comma separated">
         <input
           type="text"
           value={tagsInput}
@@ -218,43 +259,68 @@ export default function PromptForm({ existing }: Props) {
         />
       </Field>
 
-      <Field label={existing?.referenceImage?.src ? 'Reference image (current)' : 'Reference image (optional)'}>
+      <Field label="Reference images (optional)">
         <div className="flex items-start gap-3 flex-wrap">
           <label className="inline-flex items-center gap-2 h-9 px-4 text-[13px] font-medium text-text-secondary bg-white/[0.02] border border-border rounded-full hover:bg-white/[0.05] hover:text-text-primary transition-colors cursor-pointer">
             <Upload className="w-3.5 h-3.5" />
-            {imageFile ? 'Change' : existing?.referenceImage?.src ? 'Replace' : 'Choose file'}
+            {images.length > 0 ? 'Add more' : 'Choose files'}
             <input
               type="file"
               accept="image/png,image/jpeg,image/webp,image/svg+xml"
-              onChange={(e) => setImageFile(e.target.files?.[0] ?? null)}
+              multiple
+              onChange={(e) => {
+                addFiles(e.target.files);
+                e.target.value = '';
+              }}
               className="sr-only"
             />
           </label>
-          {imageFile && (
+          {images.length > 0 && (
             <span className="text-[12px] text-text-muted self-center">
-              {imageFile.name}
+              {images.length} {images.length === 1 ? 'image' : 'images'}
             </span>
           )}
         </div>
-        {imagePreview && (
-          <div className="mt-3 max-w-[360px] border border-border rounded-lg overflow-hidden">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={imagePreview} alt="" className="w-full h-auto" />
+        {images.length > 0 && (
+          <div className="mt-4 flex flex-col gap-3">
+            {images.map((img, i) => (
+              <div
+                key={i}
+                className="flex items-start gap-3 bg-white/[0.02] border border-border rounded-lg p-3"
+              >
+                <div className="shrink-0 w-24 h-24 overflow-hidden rounded-md border border-border-subtle">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={img.kind === 'existing' ? img.url : img.previewUrl}
+                    alt=""
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <label className="block text-[11px] font-medium text-text-muted mb-1">
+                    Alt text
+                  </label>
+                  <input
+                    type="text"
+                    value={img.alt}
+                    onChange={(e) => updateAlt(i, e.target.value)}
+                    className="input"
+                    placeholder="What the image shows"
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={() => removeImage(i)}
+                  aria-label="Remove image"
+                  className="shrink-0 inline-flex items-center justify-center w-7 h-7 rounded-full text-text-muted hover:text-red-400 hover:bg-red-500/10 transition-colors"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            ))}
           </div>
         )}
       </Field>
-
-      {(imageFile || existing?.referenceImage?.src) && (
-        <Field label="Image alt text">
-          <input
-            type="text"
-            value={imageAlt}
-            onChange={(e) => setImageAlt(e.target.value)}
-            className="input"
-            placeholder="What the image shows"
-          />
-        </Field>
-      )}
 
       {error && (
         <div className="text-[13px] text-red-400 bg-red-500/10 border border-red-500/30 rounded-md px-3 py-2">
