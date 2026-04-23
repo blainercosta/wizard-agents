@@ -12,7 +12,7 @@ const LINKS = [
   },
   {
     network: 'instagram' as const,
-    href: 'https://instagram.com/blainercosta',
+    href: 'https://instagram.com/_blainercosta',
     label: 'Instagram',
     Icon: Instagram,
   },
