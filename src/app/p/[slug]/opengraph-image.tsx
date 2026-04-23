@@ -1,5 +1,6 @@
 import { ImageResponse } from 'next/og';
-import { getPromptBySlug } from '@/lib/prompts';
+import { publicSupabase } from '@/lib/supabase/public';
+import { getPublishedPromptBySlug } from '@/lib/supabase/prompts';
 
 export const runtime = 'edge';
 export const alt = 'Prompt preview';
@@ -11,10 +12,9 @@ export default async function OpengraphImage({
 }: {
   params: { slug: string };
 }) {
-  const prompt = getPromptBySlug(params.slug);
+  const prompt = await getPublishedPromptBySlug(publicSupabase, params.slug);
   const title = prompt?.title ?? 'Prompt';
-  const description =
-    prompt?.description ?? 'Prompts prontos pra usar em IA.';
+  const description = prompt?.description ?? 'Prompts prontos pra usar em IA.';
 
   return new ImageResponse(
     (
@@ -31,13 +31,7 @@ export default async function OpengraphImage({
           justifyContent: 'space-between',
         }}
       >
-        <div
-          style={{
-            fontSize: 22,
-            color: '#8a8f98',
-            letterSpacing: '-0.011em',
-          }}
-        >
+        <div style={{ fontSize: 22, color: '#8a8f98', letterSpacing: '-0.011em' }}>
           prompts.blainercosta.com
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
@@ -52,24 +46,11 @@ export default async function OpengraphImage({
           >
             {title}
           </div>
-          <div
-            style={{
-              fontSize: 28,
-              color: '#d0d6e0',
-              lineHeight: 1.35,
-              maxWidth: 900,
-            }}
-          >
+          <div style={{ fontSize: 28, color: '#d0d6e0', lineHeight: 1.35, maxWidth: 900 }}>
             {description}
           </div>
         </div>
-        <div
-          style={{
-            fontSize: 20,
-            color: '#8a8f98',
-            letterSpacing: '-0.011em',
-          }}
-        >
+        <div style={{ fontSize: 20, color: '#8a8f98', letterSpacing: '-0.011em' }}>
           @blainercosta
         </div>
       </div>
