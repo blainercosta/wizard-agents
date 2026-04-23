@@ -15,6 +15,7 @@ type Strings = {
   modalHero: string;
   modalMentorshipCta: string;
   modalCommunityCta: string;
+  howToUseTitle: string;
   madeBy: string;
   landingTitleLine1: string;
   landingTitleLine2: string;
@@ -41,6 +42,7 @@ const dict: Record<Locale, Strings> = {
     modalHero: 'Quer aprender mais sobre IA?',
     modalMentorshipCta: 'Entrar para Caverna',
     modalCommunityCta: 'Comunidade IA Grátis',
+    howToUseTitle: 'Como usar',
     madeBy: 'Feito por',
     landingTitleLine1: 'Prompts prontos,',
     landingTitleLine2: 'sem enrolação.',
@@ -69,6 +71,7 @@ const dict: Record<Locale, Strings> = {
     modalHero: 'Want to learn more about AI?',
     modalMentorshipCta: 'Join the Caverna',
     modalCommunityCta: 'Free AI community',
+    howToUseTitle: 'How to use',
     madeBy: 'Made by',
     landingTitleLine1: 'Ready-to-use prompts,',
     landingTitleLine2: 'no fluff.',
