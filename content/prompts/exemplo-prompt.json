@@ -1,0 +1,15 @@
+{
+  "slug": "exemplo-prompt",
+  "title": "Prompt de exemplo",
+  "description": "Descrição curta usada no card e no OG.",
+  "content": "Você é um especialista em X. Sua tarefa é Y.\n\nRegras:\n1. Sempre responda em português.\n2. Seja direto e conciso.\n3. Nunca invente fatos — se não souber, diga que não sabe.\n\nFormato de saída:\n- Bullet points quando a resposta tem mais de três itens.\n- Parágrafos curtos quando é narrativa.",
+  "format": "text",
+  "referenceImage": {
+    "src": "/images/prompts/exemplo-prompt.svg",
+    "alt": "Captura ilustrativa do resultado do prompt",
+    "width": 1200,
+    "height": 630
+  },
+  "tags": ["writing"],
+  "publishedAt": "2026-04-23"
+}
