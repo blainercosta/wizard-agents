@@ -110,16 +110,16 @@ export default function CopyButton({ slug, content, format }: Props) {
             type="button"
             onClick={handleClick}
             disabled={pending}
-            className="w-full inline-flex items-center justify-center gap-2 h-10 px-5 text-[13px] font-medium text-text-primary bg-accent-brand hover:bg-accent-hover rounded-full transition-colors disabled:opacity-60"
+            className="w-full inline-flex items-center justify-center gap-2 h-12 px-6 text-base font-medium text-text-primary bg-accent-brand hover:bg-accent-hover rounded-full transition-colors disabled:opacity-60"
           >
             {copied ? (
               <>
-                <Check className="w-4 h-4" strokeWidth={2.5} />
+                <Check className="w-5 h-5" strokeWidth={2.5} />
                 Copiado
               </>
             ) : (
               <>
-                <Copy className="w-4 h-4" />
+                <Copy className="w-5 h-5" />
                 Copiar prompt
               </>
             )}

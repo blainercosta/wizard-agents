@@ -18,20 +18,24 @@ export default function PromptView({ prompt, initialCount }: Props) {
           <PromptViewTracker slug={prompt.slug} />
 
           <header className="mb-8">
-            <div className="flex items-center gap-2 mb-3 flex-wrap">
-              <CopyCounter slug={prompt.slug} initialCount={initialCount} />
-              {prompt.tags.map((tag) => (
-                <span
-                  key={tag}
-                  className="inline-flex items-center h-6 px-2.5 text-[11px] font-medium text-text-secondary bg-white/[0.04] rounded-full"
-                >
-                  {tag}
-                </span>
-              ))}
-            </div>
+            {prompt.tags.length > 0 && (
+              <div className="flex items-center gap-2 mb-3 flex-wrap">
+                {prompt.tags.map((tag) => (
+                  <span
+                    key={tag}
+                    className="inline-flex items-center h-6 px-2.5 text-[11px] font-medium text-text-secondary bg-white/[0.04] rounded-full"
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            )}
             <h1 className="text-3xl md:text-4xl font-medium text-text-primary tracking-display leading-tight mb-3">
               {prompt.title}
             </h1>
+            <div className="mb-4">
+              <CopyCounter slug={prompt.slug} initialCount={initialCount} />
+            </div>
             <p className="text-lg text-text-secondary leading-relaxed">
               {prompt.description}
             </p>
