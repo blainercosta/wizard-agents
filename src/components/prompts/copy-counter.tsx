@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { Heart } from 'lucide-react';
 
 function format(n: number): string {
   if (n < 1000) return n.toLocaleString('pt-BR');
@@ -30,8 +31,9 @@ export default function CopyCounter({ initialCount }: Props) {
   if (count <= 0) return null;
 
   return (
-    <span className="inline-flex items-center h-6 px-2.5 text-[11px] font-medium text-text-muted bg-white/[0.04] border border-border-subtle rounded-full tabular-nums">
-      {format(count)} {count === 1 ? 'cópia' : 'cópias'}
+    <span className="inline-flex items-center gap-1.5 text-[13px] text-text-muted tabular-nums">
+      <Heart className="w-3.5 h-3.5 text-accent-lilac" fill="currentColor" strokeWidth={0} />
+      {format(count)} downloads realizados
     </span>
   );
 }
