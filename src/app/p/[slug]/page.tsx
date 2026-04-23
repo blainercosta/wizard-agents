@@ -1,16 +1,23 @@
 import { notFound } from 'next/navigation';
-import { getAllPromptSlugs, getPromptBySlug } from '@/lib/prompts';
+import { publicSupabase } from '@/lib/supabase/public';
+import {
+  getPublishedPromptBySlug,
+  getAllPublishedPrompts,
+} from '@/lib/supabase/prompts';
 import { getCopyCount } from '@/lib/prompt-stats';
 import PromptView from '@/components/prompts/prompt-view';
 
+export const revalidate = 60;
+
 export async function generateStaticParams() {
-  return getAllPromptSlugs().map((slug) => ({ slug }));
+  const prompts = await getAllPublishedPrompts(publicSupabase);
+  return prompts.map((p) => ({ slug: p.slug }));
 }
 
 type Params = { params: { slug: string } };
 
 export async function generateMetadata({ params }: Params) {
-  const prompt = getPromptBySlug(params.slug);
+  const prompt = await getPublishedPromptBySlug(publicSupabase, params.slug);
   if (!prompt) return { title: 'Prompt não encontrado' };
 
   const base = 'https://prompts.blainercosta.com';
@@ -37,7 +44,7 @@ export async function generateMetadata({ params }: Params) {
 }
 
 export default async function PromptPage({ params }: Params) {
-  const prompt = getPromptBySlug(params.slug);
+  const prompt = await getPublishedPromptBySlug(publicSupabase, params.slug);
   if (!prompt) notFound();
 
   const initialCount = await getCopyCount(prompt.slug);

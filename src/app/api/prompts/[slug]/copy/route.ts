@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
-import { PROMPT_SLUGS } from '@/lib/prompt-slugs';
+import { publicSupabase } from '@/lib/supabase/public';
+import { getPublishedPromptBySlug } from '@/lib/supabase/prompts';
 import { incrementCopyCount } from '@/lib/prompt-stats';
 
 export const runtime = 'nodejs';
@@ -8,12 +9,12 @@ export async function POST(
   _request: Request,
   { params }: { params: { slug: string } }
 ) {
-  const slug = params.slug;
-  if (!PROMPT_SLUGS.has(slug)) {
+  const prompt = await getPublishedPromptBySlug(publicSupabase, params.slug);
+  if (!prompt) {
     return NextResponse.json({ error: 'Unknown prompt' }, { status: 404 });
   }
   try {
-    const count = await incrementCopyCount(slug);
+    const count = await incrementCopyCount(params.slug);
     return NextResponse.json({ count });
   } catch (err) {
     return NextResponse.json(

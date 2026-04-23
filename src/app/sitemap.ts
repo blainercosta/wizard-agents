@@ -1,12 +1,14 @@
 import type { MetadataRoute } from 'next';
 import { headers } from 'next/headers';
-import { getAllPrompts } from '@/lib/prompts';
+import { publicSupabase } from '@/lib/supabase/public';
+import { getAllPublishedPrompts } from '@/lib/supabase/prompts';
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const host = (headers().get('host') ?? '').toLowerCase();
 
   if (host.startsWith('prompts.')) {
     const base = 'https://prompts.blainercosta.com';
+    const prompts = await getAllPublishedPrompts(publicSupabase);
     return [
       {
         url: base,
@@ -14,7 +16,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
         changeFrequency: 'weekly',
         priority: 1,
       },
-      ...getAllPrompts().map((p) => ({
+      ...prompts.map((p) => ({
         url: `${base}/${p.slug}`,
         lastModified: new Date(p.publishedAt),
         changeFrequency: 'monthly' as const,
@@ -23,6 +25,5 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ];
   }
 
-  // Wizards host — no sitemap entries wired yet; keep shape but empty.
   return [];
 }

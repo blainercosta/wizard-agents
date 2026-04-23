@@ -60,9 +60,17 @@ export default async function AdminPage({
             <ArrowLeft className="w-3.5 h-3.5" /> All agents
           </Link>
 
-          <h1 className="text-3xl md:text-4xl font-medium text-text-primary tracking-display leading-tight mb-3">
-            Moderation
-          </h1>
+          <div className="flex items-baseline justify-between gap-4 mb-3 flex-wrap">
+            <h1 className="text-3xl md:text-4xl font-medium text-text-primary tracking-display leading-tight">
+              Moderation
+            </h1>
+            <Link
+              href="/admin/prompts"
+              className="inline-flex items-center h-8 px-3 text-[13px] font-medium text-text-secondary bg-white/[0.02] border border-border rounded-full hover:bg-white/[0.05] hover:text-text-primary transition-colors"
+            >
+              Prompts →
+            </Link>
+          </div>
           <p className="text-[15px] text-text-muted mb-8">
             Review and track decisions on community submissions.
           </p>
