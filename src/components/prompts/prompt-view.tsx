@@ -1,4 +1,5 @@
 import type { Prompt } from '@/types/prompt';
+import type { I18n } from '@/lib/i18n';
 import CopyCounter from './copy-counter';
 import CopyButton from './copy-button';
 import ReferenceImage from './reference-image';
@@ -8,9 +9,10 @@ import PromptViewTracker from './prompt-view-tracker';
 type Props = {
   prompt: Prompt;
   initialCount: number;
+  t: I18n;
 };
 
-export default function PromptView({ prompt, initialCount }: Props) {
+export default function PromptView({ prompt, initialCount, t }: Props) {
   return (
     <div className="min-h-screen flex flex-col bg-background-primary">
       <main className="flex-1">
@@ -34,7 +36,7 @@ export default function PromptView({ prompt, initialCount }: Props) {
               {prompt.title}
             </h1>
             <div className="mb-4">
-              <CopyCounter slug={prompt.slug} initialCount={initialCount} />
+              <CopyCounter slug={prompt.slug} initialCount={initialCount} t={t} />
             </div>
             <p className="text-lg text-text-secondary leading-relaxed">
               {prompt.description}
@@ -68,6 +70,7 @@ export default function PromptView({ prompt, initialCount }: Props) {
             slug={prompt.slug}
             content={prompt.content}
             format={prompt.format}
+            t={t}
           />
         </article>
       </main>
@@ -75,7 +78,8 @@ export default function PromptView({ prompt, initialCount }: Props) {
       <footer className="border-t border-border-subtle">
         <div className="max-w-3xl mx-auto px-6 py-8 flex items-center justify-between flex-wrap gap-4">
           <p className="text-[13px] text-text-muted">
-            Feito por <span className="text-text-secondary">@blainercosta</span>
+            {t.madeBy}{' '}
+            <span className="text-text-secondary">@_blainercosta</span>
           </p>
           <SocialLinks />
         </div>

@@ -5,11 +5,13 @@ import { Copy, Check } from 'lucide-react';
 import { track } from '@/lib/analytics';
 import SuccessModal from './success-modal';
 import type { PromptFormat } from '@/types/prompt';
+import type { I18n } from '@/lib/i18n';
 
 type Props = {
   slug: string;
   content: string;
   format: PromptFormat;
+  t: I18n;
 };
 
 function formatContent(content: string, format: PromptFormat, slug: string): string {
@@ -51,7 +53,7 @@ async function writeToClipboard(text: string): Promise<boolean> {
   }
 }
 
-export default function CopyButton({ slug, content, format }: Props) {
+export default function CopyButton({ slug, content, format, t }: Props) {
   const [copied, setCopied] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [fallbackMessage, setFallbackMessage] = useState<string | null>(null);
@@ -66,9 +68,7 @@ export default function CopyButton({ slug, content, format }: Props) {
     const ok = await writeToClipboard(text);
 
     if (!ok) {
-      setFallbackMessage(
-        'Toque e segure no bloco acima pra copiar manualmente.'
-      );
+      setFallbackMessage(t.copyHint);
       track('prompt_copy_failed', {
         slug,
         reason: 'clipboard_unavailable',
@@ -115,12 +115,12 @@ export default function CopyButton({ slug, content, format }: Props) {
             {copied ? (
               <>
                 <Check className="w-5 h-5" strokeWidth={2.5} />
-                Copiado
+                {t.copied}
               </>
             ) : (
               <>
                 <Copy className="w-5 h-5" />
-                Copiar prompt
+                {t.copy}
               </>
             )}
           </button>
@@ -136,6 +136,7 @@ export default function CopyButton({ slug, content, format }: Props) {
         open={showModal}
         onClose={() => setShowModal(false)}
         slug={slug}
+        t={t}
       />
     </>
   );

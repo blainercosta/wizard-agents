@@ -3,17 +3,16 @@
 import { Check, X } from 'lucide-react';
 import { Dialog } from './dialog';
 import { track } from '@/lib/analytics';
+import { COMMUNITY_URL, MENTORIA_URL, type I18n } from '@/lib/i18n';
 
 type Props = {
   open: boolean;
   onClose: () => void;
   slug: string;
+  t: I18n;
 };
 
-const COMMUNITY_URL = 'https://blainercosta.com/comunidade';
-const MENTORIA_URL = 'https://blainercosta.com/mentoria';
-
-export default function SuccessModal({ open, onClose, slug }: Props) {
+export default function SuccessModal({ open, onClose, slug, t }: Props) {
   return (
     <Dialog open={open} onClose={onClose} labelledBy="prompt-success-title">
       <div className="p-6">
@@ -26,8 +25,8 @@ export default function SuccessModal({ open, onClose, slug }: Props) {
               id="prompt-success-title"
               className="text-[13px] font-medium text-text-primary"
             >
-              Copiado{' '}
-              <span className="text-text-muted">· Cola no seu gerador</span>
+              {t.modalCopiedLead}{' '}
+              <span className="text-text-muted">{t.modalCopiedDescription}</span>
             </h2>
           </div>
           <button
@@ -41,13 +40,13 @@ export default function SuccessModal({ open, onClose, slug }: Props) {
         </div>
 
         <p className="text-xl font-medium text-text-primary tracking-tight mb-5">
-          Aprenda mais sobre IA
+          {t.modalHero}
         </p>
 
         <div className="flex flex-col gap-3">
           <div>
             <p className="text-[13px] font-medium text-text-secondary mb-2">
-              Mentoria do Mago
+              {t.modalMentorshipLabel}
             </p>
             <a
               href={MENTORIA_URL}
@@ -58,13 +57,13 @@ export default function SuccessModal({ open, onClose, slug }: Props) {
               }
               className="inline-flex w-full items-center justify-center h-11 px-5 text-[15px] font-medium text-text-primary bg-accent-brand hover:bg-accent-hover rounded-full transition-colors"
             >
-              Quero ser mentorado
+              {t.modalMentorshipCta}
             </a>
           </div>
 
           <div>
             <p className="text-[13px] font-medium text-text-secondary mb-2">
-              Comunidade IA · Grátis
+              {t.modalCommunityLabel}
             </p>
             <a
               href={COMMUNITY_URL}
@@ -75,7 +74,7 @@ export default function SuccessModal({ open, onClose, slug }: Props) {
               }
               className="inline-flex w-full items-center justify-center h-11 px-5 text-[15px] font-medium text-text-secondary bg-white/[0.02] border border-border hover:bg-white/[0.05] hover:text-text-primary rounded-full transition-colors"
             >
-              Entrar agora
+              {t.modalCommunityCta}
             </a>
           </div>
         </div>
