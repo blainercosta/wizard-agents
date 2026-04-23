@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useTransition } from 'react';
-import { ExternalLink, Trash2, Copy, Check } from 'lucide-react';
+import Link from 'next/link';
+import { ExternalLink, Trash2, Copy, Check, Pencil } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { deletePrompt } from '@/lib/supabase/prompts';
 import { copyToClipboard, formatDate } from '@/lib/utils';
@@ -74,6 +75,13 @@ export default function PromptAdminCard({ prompt }: Props) {
             )}
             {copied ? 'Copiado' : 'Copiar URL'}
           </button>
+          <Link
+            href={`/admin/prompts/${prompt.id}/edit`}
+            aria-label="Edit"
+            className="inline-flex items-center justify-center w-8 h-8 rounded-full text-text-secondary bg-white/[0.02] border border-border hover:bg-white/[0.05] hover:text-text-primary transition-colors"
+          >
+            <Pencil className="w-3.5 h-3.5" />
+          </Link>
           <a
             href={url}
             target="_blank"

@@ -4,7 +4,7 @@ import { ArrowLeft } from 'lucide-react';
 import { Header, Footer } from '@/components';
 import { createClient } from '@/lib/supabase/server';
 import { isCurrentUserAdmin } from '@/lib/supabase/community';
-import PromptCreateForm from '@/components/prompts/create-form';
+import PromptForm from '@/components/prompts/prompt-form';
 
 export const metadata = {
   title: 'New prompt · Admin',
@@ -35,7 +35,7 @@ export default async function AdminNewPromptPage() {
             after saving.
           </p>
 
-          <PromptCreateForm />
+          <PromptForm />
         </div>
       </main>
       <Footer />

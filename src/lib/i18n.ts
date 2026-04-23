@@ -9,12 +9,9 @@ type Strings = {
   copy: string;
   copied: string;
   copyHint: string;
-  modalCopiedLead: string;
-  modalCopiedDescription: string;
+  modalCopiedLine: string;
   modalHero: string;
-  modalMentorshipLabel: string;
   modalMentorshipCta: string;
-  modalCommunityLabel: string;
   modalCommunityCta: string;
   madeBy: string;
   landingTitleLine1: string;
@@ -38,13 +35,10 @@ const dict: Record<Locale, Strings> = {
     copy: 'Copiar prompt',
     copied: 'Copiado',
     copyHint: 'Toque e segure no bloco acima pra copiar manualmente.',
-    modalCopiedLead: 'Copiado',
-    modalCopiedDescription: '· Cola no seu gerador',
-    modalHero: 'Aprenda mais sobre IA',
-    modalMentorshipLabel: 'Mentoria do Mago',
-    modalMentorshipCta: 'Quero ser mentorado',
-    modalCommunityLabel: 'Comunidade IA · Grátis',
-    modalCommunityCta: 'Entrar agora',
+    modalCopiedLine: 'Copiado com sucesso, cola na IA!',
+    modalHero: 'Quer aprender mais sobre IA?',
+    modalMentorshipCta: 'Entrar para Caverna',
+    modalCommunityCta: 'Comunidade IA Grátis',
     madeBy: 'Feito por',
     landingTitleLine1: 'Prompts prontos,',
     landingTitleLine2: 'sem enrolação.',
@@ -69,13 +63,10 @@ const dict: Record<Locale, Strings> = {
     copy: 'Copy prompt',
     copied: 'Copied',
     copyHint: 'Tap and hold the block above to copy manually.',
-    modalCopiedLead: 'Copied',
-    modalCopiedDescription: '· Paste it in your generator',
-    modalHero: 'Learn more about AI',
-    modalMentorshipLabel: 'Wizard Mentorship',
-    modalMentorshipCta: 'I want to be mentored',
-    modalCommunityLabel: 'AI Community · Free',
-    modalCommunityCta: 'Join now',
+    modalCopiedLine: 'Copied! Paste it into the AI.',
+    modalHero: 'Want to learn more about AI?',
+    modalMentorshipCta: 'Join the Caverna',
+    modalCommunityCta: 'Free AI community',
     madeBy: 'Made by',
     landingTitleLine1: 'Ready-to-use prompts,',
     landingTitleLine2: 'no fluff.',

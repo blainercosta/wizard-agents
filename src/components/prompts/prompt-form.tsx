@@ -1,34 +1,55 @@
 'use client';
 
 import { useState, useTransition } from 'react';
+import { useRouter } from 'next/navigation';
 import { Check, Copy, ExternalLink, Upload } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
-import { createPrompt, uploadPromptImage } from '@/lib/supabase/prompts';
+import {
+  createPrompt,
+  updatePrompt,
+  uploadPromptImage,
+} from '@/lib/supabase/prompts';
 import { slugify, copyToClipboard } from '@/lib/utils';
+import type { Prompt } from '@/types/prompt';
 
 type Created = { slug: string; title: string };
 
-export default function PromptCreateForm() {
+type Props = {
+  existing?: (Prompt & { id: string }) | null;
+};
+
+export default function PromptForm({ existing }: Props) {
+  const router = useRouter();
   const supabase = createClient();
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [created, setCreated] = useState<Created | null>(null);
+  const [savedOk, setSavedOk] = useState(false);
 
-  const [title, setTitle] = useState('');
+  const isEdit = !!existing;
+
+  const [title, setTitle] = useState(existing?.title ?? '');
   const [slugOverride, setSlugOverride] = useState('');
-  const [description, setDescription] = useState('');
-  const [content, setContent] = useState('');
-  const [format, setFormat] = useState<'text' | 'json'>('text');
-  const [tagsInput, setTagsInput] = useState('');
+  const [description, setDescription] = useState(existing?.description ?? '');
+  const [content, setContent] = useState(existing?.content ?? '');
+  const [format, setFormat] = useState<'text' | 'json'>(existing?.format ?? 'text');
+  const [tagsInput, setTagsInput] = useState(existing?.tags.join(', ') ?? '');
   const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imageAlt, setImageAlt] = useState('');
+  const [imageAlt, setImageAlt] = useState(existing?.referenceImage?.alt ?? '');
 
-  const slug = slugOverride.trim() ? slugify(slugOverride) : slugify(title);
+  const slug = isEdit
+    ? existing!.slug
+    : slugOverride.trim()
+      ? slugify(slugOverride)
+      : slugify(title);
+
   const tags = tagsInput
     .split(',')
     .map((t) => t.trim())
     .filter(Boolean);
-  const imagePreview = imageFile ? URL.createObjectURL(imageFile) : null;
+  const imagePreview = imageFile
+    ? URL.createObjectURL(imageFile)
+    : existing?.referenceImage?.src || null;
 
   function validate(): string | null {
     if (!title.trim()) return 'Title is required.';
@@ -52,6 +73,7 @@ export default function PromptCreateForm() {
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+    setSavedOk(false);
     const v = validate();
     if (v) {
       setError(v);
@@ -60,31 +82,45 @@ export default function PromptCreateForm() {
 
     startTransition(async () => {
       try {
-        let imageUrl: string | null = null;
+        let imageUrl: string | null = existing?.referenceImage?.src || null;
         if (imageFile) {
           imageUrl = await uploadPromptImage(supabase, slug, imageFile);
         }
 
-        await createPrompt(supabase, {
-          slug,
-          title: title.trim(),
-          description: description.trim(),
-          content,
-          format,
-          referenceImageUrl: imageUrl,
-          referenceImageAlt: imageAlt.trim() || null,
-          tags,
-        });
-
-        setCreated({ slug, title: title.trim() });
+        if (isEdit) {
+          await updatePrompt(supabase, existing!.id, {
+            title: title.trim(),
+            description: description.trim(),
+            content,
+            format,
+            referenceImageUrl: imageUrl,
+            referenceImageAlt: imageAlt.trim() || null,
+            tags,
+          });
+          setSavedOk(true);
+          router.refresh();
+          setTimeout(() => setSavedOk(false), 2500);
+        } else {
+          await createPrompt(supabase, {
+            slug,
+            title: title.trim(),
+            description: description.trim(),
+            content,
+            format,
+            referenceImageUrl: imageUrl,
+            referenceImageAlt: imageAlt.trim() || null,
+            tags,
+          });
+          setCreated({ slug, title: title.trim() });
+        }
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to create');
+        setError(err instanceof Error ? err.message : 'Failed to save');
       }
     });
   }
 
   if (created) {
-    return <Success slug={created.slug} title={created.title} />;
+    return <CreatedSuccess slug={created.slug} title={created.title} />;
   }
 
   return (
@@ -99,15 +135,28 @@ export default function PromptCreateForm() {
         />
       </Field>
 
-      <Field label="Slug override (optional)">
-        <input
-          type="text"
-          value={slugOverride}
-          onChange={(e) => setSlugOverride(e.target.value)}
-          className="input"
-          placeholder={slugify(title) || 'auto-generated-from-title'}
-        />
-      </Field>
+      {!isEdit && (
+        <Field label="Slug override (optional)">
+          <input
+            type="text"
+            value={slugOverride}
+            onChange={(e) => setSlugOverride(e.target.value)}
+            className="input"
+            placeholder={slugify(title) || 'auto-generated-from-title'}
+          />
+        </Field>
+      )}
+
+      {isEdit && (
+        <Field label="Slug (read-only)" hint="Editing the slug would break existing links.">
+          <input
+            type="text"
+            value={existing!.slug}
+            readOnly
+            className="input opacity-70 cursor-not-allowed"
+          />
+        </Field>
+      )}
 
       <Field label="Description" hint={`${description.length}/280`}>
         <textarea
@@ -154,7 +203,7 @@ export default function PromptCreateForm() {
           placeholder={
             format === 'json'
               ? '{ "system": "..." }'
-              : 'Você é um especialista em X...'
+              : 'You are an expert in X...'
           }
         />
       </Field>
@@ -169,11 +218,11 @@ export default function PromptCreateForm() {
         />
       </Field>
 
-      <Field label="Reference image (optional)">
+      <Field label={existing?.referenceImage?.src ? 'Reference image (current)' : 'Reference image (optional)'}>
         <div className="flex items-start gap-3 flex-wrap">
           <label className="inline-flex items-center gap-2 h-9 px-4 text-[13px] font-medium text-text-secondary bg-white/[0.02] border border-border rounded-full hover:bg-white/[0.05] hover:text-text-primary transition-colors cursor-pointer">
             <Upload className="w-3.5 h-3.5" />
-            {imageFile ? 'Change' : 'Choose file'}
+            {imageFile ? 'Change' : existing?.referenceImage?.src ? 'Replace' : 'Choose file'}
             <input
               type="file"
               accept="image/png,image/jpeg,image/webp,image/svg+xml"
@@ -195,7 +244,7 @@ export default function PromptCreateForm() {
         )}
       </Field>
 
-      {imageFile && (
+      {(imageFile || existing?.referenceImage?.src) && (
         <Field label="Image alt text">
           <input
             type="text"
@@ -213,13 +262,26 @@ export default function PromptCreateForm() {
         </div>
       )}
 
-      <div className="flex justify-end pt-2">
+      <div className="flex justify-between items-center gap-4 pt-2 flex-wrap">
+        <p className="text-[12px] text-text-muted min-h-[20px]">
+          {savedOk && (
+            <span className="inline-flex items-center gap-1.5 text-accent-neon">
+              <Check className="w-3.5 h-3.5" /> Saved
+            </span>
+          )}
+        </p>
         <button
           type="submit"
           disabled={pending}
           className="inline-flex items-center h-9 px-4 text-[13px] font-medium text-text-primary bg-accent-brand hover:bg-accent-hover rounded-full transition-colors disabled:opacity-60"
         >
-          {pending ? 'Publishing…' : 'Publish prompt'}
+          {pending
+            ? isEdit
+              ? 'Saving…'
+              : 'Publishing…'
+            : isEdit
+              ? 'Save changes'
+              : 'Publish prompt'}
         </button>
       </div>
 
@@ -269,7 +331,7 @@ function Field({
   );
 }
 
-function Success({ slug, title }: Created) {
+function CreatedSuccess({ slug, title }: Created) {
   const url = `https://prompts.blainercosta.com/${slug}`;
   const [copied, setCopied] = useState(false);
 
