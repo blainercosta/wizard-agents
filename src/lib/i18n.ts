@@ -5,7 +5,9 @@ export const COMMUNITY_URL = 'https://chat.whatsapp.com/IqAcKnOasOr2PlOZ1t5VVn';
 export const MENTORIA_URL = 'https://tally.so/r/xXdEDd';
 
 type Strings = {
-  downloads: (count: string) => string;
+  // Template with {count} placeholder so this object stays serializable
+  // across the RSC boundary when passed to Client Components.
+  downloadsTemplate: string;
   copy: string;
   copied: string;
   copyHint: string;
@@ -31,7 +33,7 @@ type Strings = {
 
 const dict: Record<Locale, Strings> = {
   'pt-BR': {
-    downloads: (c) => `${c} downloads realizados`,
+    downloadsTemplate: '{count} downloads realizados',
     copy: 'Copiar prompt',
     copied: 'Copiado',
     copyHint: 'Toque e segure no bloco acima pra copiar manualmente.',
@@ -59,7 +61,7 @@ const dict: Record<Locale, Strings> = {
       'Prompts prontos pra usar em IA, feitos por @_blainercosta.',
   },
   en: {
-    downloads: (c) => `${c} downloads`,
+    downloadsTemplate: '{count} downloads',
     copy: 'Copy prompt',
     copied: 'Copied',
     copyHint: 'Tap and hold the block above to copy manually.',

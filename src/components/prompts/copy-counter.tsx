@@ -35,7 +35,7 @@ export default function CopyCounter({ initialCount, t }: Props) {
   return (
     <span className="inline-flex items-center gap-1.5 text-[13px] text-text-muted tabular-nums">
       <Heart className="w-3.5 h-3.5 text-accent-lilac" fill="currentColor" strokeWidth={0} />
-      {t.downloads(format(count))}
+      {t.downloadsTemplate.replace('{count}', format(count))}
     </span>
   );
 }
