@@ -1,3 +1,4 @@
+import { Lock } from 'lucide-react';
 import type { Prompt } from '@/types/prompt';
 import type { I18n } from '@/lib/i18n';
 import CopyCounter from './copy-counter';
@@ -24,6 +25,14 @@ export default function PromptView({ prompt, initialCount, t }: Props) {
           <PromptViewTracker slug={prompt.slug} />
 
           <header className="mb-8">
+            {prompt.audience === 'mentees' && (
+              <div className="mb-3">
+                <span className="inline-flex items-center gap-1.5 h-6 px-2.5 text-[11px] font-medium text-accent-lilac bg-accent-lilac/10 border border-accent-lilac/30 rounded-full">
+                  <Lock className="w-3 h-3" />
+                  {t.exclusiveBadge}
+                </span>
+              </div>
+            )}
             {prompt.tags.length > 0 && (
               <div className="flex items-center gap-2 mb-3 flex-wrap">
                 {prompt.tags.map((tag) => (

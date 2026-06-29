@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { publicSupabase } from '@/lib/supabase/public';
+import { createClient } from '@/lib/supabase/server';
 import { getPublishedPromptBySlug } from '@/lib/supabase/prompts';
 import { incrementCopyCount } from '@/lib/prompt-stats';
 
@@ -9,7 +9,10 @@ export async function POST(
   _request: Request,
   { params }: { params: { slug: string } }
 ) {
-  const prompt = await getPublishedPromptBySlug(publicSupabase, params.slug);
+  // Use the viewer's session so copies of exclusive prompts only count for
+  // those allowed to read them (RLS returns null otherwise → 404).
+  const supabase = createClient();
+  const prompt = await getPublishedPromptBySlug(supabase, params.slug);
   if (!prompt) {
     return NextResponse.json({ error: 'Unknown prompt' }, { status: 404 });
   }

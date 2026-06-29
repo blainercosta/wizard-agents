@@ -26,6 +26,12 @@ type Strings = {
   notFoundTitle: string;
   notFoundSubtitle: string;
   notFoundBack: string;
+  exclusiveBadge: string;
+  gateTitle: string;
+  gateSubtitleSignedOut: string;
+  gateSubtitleNoAccess: string;
+  gateSignIn: string;
+  gateMentorshipCta: string;
   pageTitleSuffix: string;
   metaDescription: string;
   landingTitle: string;
@@ -56,6 +62,14 @@ const dict: Record<Locale, Strings> = {
     notFoundSubtitle:
       'O link pode estar expirado ou o prompt ainda não foi publicado.',
     notFoundBack: 'Voltar pra home',
+    exclusiveBadge: 'Exclusivo mentorados',
+    gateTitle: 'Prompt exclusivo pra mentorados',
+    gateSubtitleSignedOut:
+      'Esse prompt é liberado só pra quem é mentorado. Entre com seu GitHub pra checar seu acesso.',
+    gateSubtitleNoAccess:
+      'Esse prompt é liberado só pra quem é mentorado. Sua conta ainda não está na lista.',
+    gateSignIn: 'Entrar com GitHub',
+    gateMentorshipCta: 'Quero ser mentorado',
     pageTitleSuffix: '· prompts.blainercosta',
     metaDescription: 'Prompts prontos pra usar em IA, feitos por @_blainercosta.',
     landingTitle: 'prompts.blainercosta',
@@ -85,6 +99,14 @@ const dict: Record<Locale, Strings> = {
     notFoundSubtitle:
       'The link may be expired or the prompt is not yet published.',
     notFoundBack: 'Back to home',
+    exclusiveBadge: 'Mentees only',
+    gateTitle: 'Mentees-only prompt',
+    gateSubtitleSignedOut:
+      'This prompt is reserved for mentees. Sign in with GitHub to check your access.',
+    gateSubtitleNoAccess:
+      'This prompt is reserved for mentees. Your account is not on the list yet.',
+    gateSignIn: 'Sign in with GitHub',
+    gateMentorshipCta: 'Apply for mentorship',
     pageTitleSuffix: '· prompts.blainercosta',
     metaDescription: 'Ready-to-use AI prompts by @_blainercosta.',
     landingTitle: 'prompts.blainercosta',

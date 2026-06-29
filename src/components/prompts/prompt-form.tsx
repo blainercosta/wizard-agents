@@ -10,7 +10,7 @@ import {
   uploadPromptImage,
 } from '@/lib/supabase/prompts';
 import { slugify, copyToClipboard } from '@/lib/utils';
-import type { Prompt, PromptImage } from '@/types/prompt';
+import type { Prompt, PromptAudience, PromptImage } from '@/types/prompt';
 
 type Created = { slug: string; title: string };
 
@@ -38,6 +38,9 @@ export default function PromptForm({ existing }: Props) {
   const [content, setContent] = useState(existing?.content ?? '');
   const [howToUse, setHowToUse] = useState(existing?.howToUse ?? '');
   const [format, setFormat] = useState<'text' | 'json'>(existing?.format ?? 'text');
+  const [audience, setAudience] = useState<PromptAudience>(
+    existing?.audience ?? 'public'
+  );
   const [tagsInput, setTagsInput] = useState(existing?.tags.join(', ') ?? '');
   const [images, setImages] = useState<PendingImage[]>(
     existing?.images.map((img) => ({
@@ -130,6 +133,7 @@ export default function PromptForm({ existing }: Props) {
           images: finalImages,
           howToUse: howToUse.trim() || null,
           tags,
+          audience,
         };
 
         if (isEdit) {
@@ -217,6 +221,45 @@ export default function PromptForm({ existing }: Props) {
                 className="sr-only"
               />
               {f.toUpperCase()}
+            </label>
+          ))}
+        </div>
+      </Field>
+
+      <Field
+        label="Visibility"
+        hint={
+          audience === 'mentees'
+            ? 'Only allowlisted mentees and admins can open this prompt.'
+            : 'Anyone with the link can open this prompt.'
+        }
+      >
+        <div className="flex gap-2">
+          {(
+            [
+              { value: 'public', label: 'Public' },
+              { value: 'mentees', label: 'Exclusivo mentorados' },
+            ] as const
+          ).map((opt) => (
+            <label
+              key={opt.value}
+              className={`inline-flex items-center h-8 px-3 text-[13px] font-medium rounded-full border transition-colors cursor-pointer ${
+                audience === opt.value
+                  ? opt.value === 'mentees'
+                    ? 'bg-accent-lilac/10 border-accent-lilac/40 text-accent-lilac'
+                    : 'bg-white/[0.05] border-border-solid text-text-primary'
+                  : 'bg-white/[0.02] border-border text-text-secondary hover:bg-white/[0.05]'
+              }`}
+            >
+              <input
+                type="radio"
+                name="audience"
+                value={opt.value}
+                checked={audience === opt.value}
+                onChange={() => setAudience(opt.value)}
+                className="sr-only"
+              />
+              {opt.label}
             </label>
           ))}
         </div>
