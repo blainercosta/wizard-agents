@@ -21,6 +21,7 @@ type Row = {
   author_avatar_url: string | null;
   created_at: string;
   updated_at: string;
+  audience: 'public' | 'mentees' | null;
 };
 
 function buildRawContent(row: Row): string {
@@ -63,23 +64,23 @@ function rowToAgent(row: Row): CommunityAgent {
       username: row.author_username,
       avatarUrl: row.author_avatar_url,
     },
+    audience: row.audience ?? 'public',
   };
 }
 
 const COLUMNS =
-  'id, slug, name, description, category, category_label, version, tags, content, status, rejection_reason, user_id, author_username, author_avatar_url, created_at, updated_at';
+  'id, slug, name, description, category, category_label, version, tags, content, status, rejection_reason, user_id, author_username, author_avatar_url, created_at, updated_at, audience';
 
-// React.cache dedupes across components within the same request.
-export const getApprovedCommunityAgents = cache(
+// Listing source: a security-definer RPC that returns all approved agents
+// with exclusive agents' content masked. Lets exclusive agents show in the
+// public listing (FOMO) without leaking their content. See
+// sql/agents_exclusive.sql.
+export const getApprovedAgentCards = cache(
   async (supabase: SupabaseClient): Promise<CommunityAgent[]> => {
-    const { data } = await supabase
-      .from('community_agents')
-      .select(COLUMNS)
-      .eq('status', 'approved')
-      .is('deleted_at', null)
-      .order('created_at', { ascending: false });
-
-    return (data ?? []).map(rowToAgent);
+    const { data } = await supabase.rpc('approved_agent_cards', {
+      p_slug: null,
+    });
+    return ((data as Row[]) ?? []).map(rowToAgent);
   }
 );
 
@@ -89,18 +90,27 @@ export const getApprovedCommunityAgents = cache(
 // Trade-off: admin approval takes up to 60s to appear publicly.
 export const getCachedApprovedAgents = unstable_cache(
   async (): Promise<CommunityAgent[]> => {
-    const { data } = await publicSupabase
-      .from('community_agents')
-      .select(COLUMNS)
-      .eq('status', 'approved')
-      .is('deleted_at', null)
-      .order('created_at', { ascending: false });
-
-    return (data ?? []).map(rowToAgent);
+    const { data } = await publicSupabase.rpc('approved_agent_cards', {
+      p_slug: null,
+    });
+    return ((data as Row[]) ?? []).map(rowToAgent);
   },
   ['approved-community-agents'],
   { revalidate: 60, tags: ['community-agents'] }
 );
+
+// Single masked card by slug — used by the detail paywall to show an
+// exclusive agent's metadata (name/description/category) without content.
+export async function getApprovedAgentCardBySlug(
+  supabase: SupabaseClient,
+  slug: string
+): Promise<CommunityAgent | null> {
+  const { data } = await supabase.rpc('approved_agent_cards', {
+    p_slug: slug,
+  });
+  const rows = (data as Row[]) ?? [];
+  return rows.length > 0 ? rowToAgent(rows[0]) : null;
+}
 
 export async function getCommunityAgentBySlug(
   supabase: SupabaseClient,
@@ -322,6 +332,18 @@ export async function getUserBookmarks(
   return bookmarks
     .map((b) => byId.get(b.agent_id))
     .filter((a): a is CommunityAgent => Boolean(a));
+}
+
+export async function setAgentAudience(
+  supabase: SupabaseClient,
+  id: string,
+  audience: 'public' | 'mentees'
+): Promise<void> {
+  const { error } = await supabase.rpc('set_agent_audience', {
+    p_id: id,
+    p_audience: audience,
+  });
+  if (error) throw error;
 }
 
 export async function isCurrentUserAdmin(
