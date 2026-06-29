@@ -46,11 +46,12 @@ export default function AgentPaywall({ agent, isLoggedIn }: Props) {
             </div>
           </div>
 
-          {/* Locked content surface */}
+          {/* Locked content surface: blurred skeleton sits behind, the
+              message defines the height so nothing overflows. */}
           <div className="relative bg-white/[0.02] border border-border rounded-lg overflow-hidden mb-8">
             <div
               aria-hidden
-              className="p-5 select-none blur-[6px] opacity-40 space-y-2"
+              className="absolute inset-0 p-5 select-none blur-[6px] opacity-40 space-y-2"
             >
               {[
                 'w-11/12',
@@ -63,7 +64,7 @@ export default function AgentPaywall({ agent, isLoggedIn }: Props) {
                 <div key={i} className={`h-3 rounded bg-white/20 ${w}`} />
               ))}
             </div>
-            <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-6 bg-background-primary/40">
+            <div className="relative flex flex-col items-center justify-center text-center px-6 py-14 bg-background-primary/40">
               <div className="inline-flex items-center justify-center w-11 h-11 rounded-full bg-accent-lilac/10 border border-accent-lilac/30 mb-4">
                 <Lock className="w-5 h-5 text-accent-lilac" />
               </div>
