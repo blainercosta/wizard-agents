@@ -4,6 +4,7 @@ import { ArrowLeft } from 'lucide-react';
 import { notFound } from 'next/navigation';
 import { Header, Footer } from '@/components';
 import ModerationCard from '@/components/moderation-card';
+import AgentAudienceToggle from '@/components/agent-audience-toggle';
 import { createClient } from '@/lib/supabase/server';
 import {
   getCommunityAgentsByStatus,
@@ -178,8 +179,16 @@ function HistoryCard({
               {isApproved ? 'Approved' : 'Rejected'}
             </span>
           </div>
-          <div className="text-xs text-text-muted">
-            /{agent.slug} · decided {formatDate(agent.updated)}
+          <div className="flex items-center gap-3 flex-wrap">
+            <span className="text-xs text-text-muted">
+              /{agent.slug} · decided {formatDate(agent.updated)}
+            </span>
+            {isApproved && (
+              <AgentAudienceToggle
+                agentId={agent.id}
+                audience={agent.audience}
+              />
+            )}
           </div>
         </div>
         <a
