@@ -1,5 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
-import type { Prompt, PromptImage } from '@/types/prompt';
+import type { Prompt, PromptAudience, PromptImage } from '@/types/prompt';
 
 type Row = {
   id: string;
@@ -12,12 +12,13 @@ type Row = {
   how_to_use: string | null;
   tags: string[];
   published_at: string | null;
+  audience: PromptAudience | null;
   created_at: string;
   updated_at: string;
 };
 
 const COLUMNS =
-  'id, slug, title, description, content, format, images, how_to_use, tags, published_at, created_at, updated_at';
+  'id, slug, title, description, content, format, images, how_to_use, tags, published_at, audience, created_at, updated_at';
 
 function rowToPrompt(row: Row): Prompt {
   return {
@@ -30,6 +31,7 @@ function rowToPrompt(row: Row): Prompt {
     howToUse: row.how_to_use,
     tags: row.tags ?? [],
     publishedAt: row.published_at ?? row.created_at,
+    audience: row.audience ?? 'public',
   };
 }
 
@@ -45,6 +47,18 @@ export async function getPublishedPromptBySlug(
     .maybeSingle();
 
   return data ? rowToPrompt(data as Row) : null;
+}
+
+// Audience of a published prompt, bypassing RLS. Lets the page tell
+// "missing" (null) apart from "exists but gated" so it can 404 vs. gate.
+export async function getPublishedPromptAudience(
+  supabase: SupabaseClient,
+  slug: string
+): Promise<PromptAudience | null> {
+  const { data } = await supabase.rpc('published_prompt_audience', {
+    p_slug: slug,
+  });
+  return (data as PromptAudience | null) ?? null;
 }
 
 export async function getAllPublishedPrompts(
@@ -97,6 +111,7 @@ type PromptInput = {
   images: PromptImage[];
   howToUse: string | null;
   tags: string[];
+  audience: PromptAudience;
 };
 
 export async function createPrompt(
@@ -112,6 +127,7 @@ export async function createPrompt(
     p_images: input.images,
     p_tags: input.tags,
     p_how_to_use: input.howToUse,
+    p_audience: input.audience,
   });
   if (error) throw error;
   return data as string;
@@ -131,6 +147,7 @@ export async function updatePrompt(
     p_images: input.images,
     p_tags: input.tags,
     p_how_to_use: input.howToUse,
+    p_audience: input.audience,
   });
   if (error) throw error;
 }

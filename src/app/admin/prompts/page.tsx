@@ -39,12 +39,20 @@ export default async function AdminPromptsPage() {
                 Manage prompts that live on prompts.blainercosta.com.
               </p>
             </div>
-            <Link
-              href="/admin/prompts/new"
-              className="inline-flex items-center gap-1.5 h-9 px-4 text-[13px] font-medium text-text-primary bg-accent-brand hover:bg-accent-hover rounded-full transition-colors shrink-0"
-            >
-              <Plus className="w-3.5 h-3.5" /> New prompt
-            </Link>
+            <div className="flex items-center gap-2 shrink-0">
+              <Link
+                href="/admin/mentees"
+                className="inline-flex items-center h-9 px-4 text-[13px] font-medium text-text-secondary bg-white/[0.02] border border-border rounded-full hover:bg-white/[0.05] hover:text-text-primary transition-colors"
+              >
+                Mentees
+              </Link>
+              <Link
+                href="/admin/prompts/new"
+                className="inline-flex items-center gap-1.5 h-9 px-4 text-[13px] font-medium text-text-primary bg-accent-brand hover:bg-accent-hover rounded-full transition-colors"
+              >
+                <Plus className="w-3.5 h-3.5" /> New prompt
+              </Link>
+            </div>
           </div>
 
           {prompts.length === 0 ? (

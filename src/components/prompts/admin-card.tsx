@@ -53,6 +53,11 @@ export default function PromptAdminCard({ prompt }: Props) {
             <span className="inline-flex items-center h-5 px-2 text-[11px] font-medium text-text-muted bg-white/[0.04] rounded-full font-mono">
               {prompt.slug}
             </span>
+            {prompt.audience === 'mentees' && (
+              <span className="inline-flex items-center h-5 px-2 text-[10px] font-medium text-accent-lilac bg-accent-lilac/10 border border-accent-lilac/30 rounded-full">
+                Exclusivo
+              </span>
+            )}
           </div>
           <p className="text-[13px] text-text-secondary mb-2 line-clamp-2">
             {prompt.description}

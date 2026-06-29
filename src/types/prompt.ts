@@ -1,5 +1,7 @@
 export type PromptFormat = 'text' | 'json';
 
+export type PromptAudience = 'public' | 'mentees';
+
 export type PromptImage = {
   url: string;
   alt: string;
@@ -15,4 +17,5 @@ export interface Prompt {
   howToUse: string | null;
   tags: string[];
   publishedAt: string;
+  audience: PromptAudience;
 }
