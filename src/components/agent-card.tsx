@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { Lock } from 'lucide-react';
 import { isCurated, type CommunityAgent } from '@/types/agent';
 import {
   getCategoryLabel,
@@ -66,6 +67,7 @@ export default function AgentCard({
   const hiddenTags = tags.length > 3 ? tags.slice(3) : [];
   const curated = isCurated(agent);
   const showAuthor = !curated;
+  const isExclusive = agent.audience === 'mentees';
 
   return (
     <Link href={agentHref(agent, fromCategory)} className="block group">
@@ -91,6 +93,12 @@ export default function AgentCard({
             {showAuthor && (
               <span className="inline-flex items-center h-5 px-2 text-[10px] font-medium text-accent-lilac border border-accent-lilac/40 rounded-full">
                 Community
+              </span>
+            )}
+            {isExclusive && (
+              <span className="inline-flex items-center gap-1 h-5 px-2 text-[10px] font-medium text-accent-lilac bg-accent-lilac/10 border border-accent-lilac/30 rounded-full">
+                <Lock className="w-2.5 h-2.5" />
+                Exclusivo mentorados
               </span>
             )}
           </div>
@@ -161,20 +169,29 @@ export default function AgentCard({
           </div>
         )}
 
-        <div className="flex gap-2 mt-auto">
-          <button
-            onClick={handleCopy}
-            className="flex-1 inline-flex items-center justify-center h-8 px-3 text-[13px] font-medium text-text-primary bg-white/[0.05] border border-border-solid rounded-full hover:bg-white/[0.08] transition-colors"
-          >
-            {copied ? 'Copied' : 'Copy prompt'}
-          </button>
-          <button
-            onClick={handleDownload}
-            className="flex-1 inline-flex items-center justify-center h-8 px-3 text-[13px] font-medium text-text-secondary bg-white/[0.02] border border-border rounded-full hover:bg-white/[0.05] hover:text-text-primary transition-colors"
-          >
-            Download
-          </button>
-        </div>
+        {isExclusive ? (
+          <div className="flex mt-auto">
+            <span className="flex-1 inline-flex items-center justify-center gap-1.5 h-8 px-3 text-[13px] font-medium text-accent-lilac bg-accent-lilac/10 border border-accent-lilac/30 rounded-full">
+              <Lock className="w-3.5 h-3.5" />
+              Desbloquear no detalhe
+            </span>
+          </div>
+        ) : (
+          <div className="flex gap-2 mt-auto">
+            <button
+              onClick={handleCopy}
+              className="flex-1 inline-flex items-center justify-center h-8 px-3 text-[13px] font-medium text-text-primary bg-white/[0.05] border border-border-solid rounded-full hover:bg-white/[0.08] transition-colors"
+            >
+              {copied ? 'Copied' : 'Copy prompt'}
+            </button>
+            <button
+              onClick={handleDownload}
+              className="flex-1 inline-flex items-center justify-center h-8 px-3 text-[13px] font-medium text-text-secondary bg-white/[0.02] border border-border rounded-full hover:bg-white/[0.05] hover:text-text-primary transition-colors"
+            >
+              Download
+            </button>
+          </div>
+        )}
       </article>
     </Link>
   );

@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Lock } from 'lucide-react';
 import { formatDate, getCategoryLabel, isNew, isRecentlyUpdated } from '@/lib/utils';
 import {
   Header,
@@ -15,7 +15,11 @@ import {
   VersionHistory,
 } from '@/components';
 import { createClient } from '@/lib/supabase/server';
-import { getCommunityAgentBySlug } from '@/lib/supabase/community';
+import {
+  getCommunityAgentBySlug,
+  getApprovedAgentCardBySlug,
+} from '@/lib/supabase/community';
+import AgentPaywall from '@/components/agent-paywall';
 import {
   getVoteCountsBatch,
   getUserVoteState,
@@ -52,11 +56,16 @@ export default async function AgentPage({ params, searchParams }: AgentPageProps
     supabase.auth.getUser(),
   ]);
 
-  if (!agent) {
-    notFound();
-  }
-
   const user = userRes.data.user;
+
+  if (!agent) {
+    // Either it doesn't exist, or it's an exclusive agent this viewer can't
+    // open. The masked-card RPC tells the two apart: a row back means it
+    // exists but is gated → paywall; nothing means truly missing → 404.
+    const card = await getApprovedAgentCardBySlug(supabase, params.slug);
+    if (!card) notFound();
+    return <AgentPaywall agent={card} isLoggedIn={!!user} />;
+  }
 
   // Skip the version history query when the agent has never been edited —
   // current === updated means agent_versions can't possibly have rows yet.
@@ -126,6 +135,12 @@ export default async function AgentPage({ params, searchParams }: AgentPageProps
               {!curated && (
                 <span className="inline-flex items-center h-5 px-2 text-[10px] font-medium text-accent-lilac border border-accent-lilac/40 rounded-full">
                   Community
+                </span>
+              )}
+              {agent.audience === 'mentees' && (
+                <span className="inline-flex items-center gap-1 h-5 px-2 text-[10px] font-medium text-accent-lilac bg-accent-lilac/10 border border-accent-lilac/30 rounded-full">
+                  <Lock className="w-2.5 h-2.5" />
+                  Exclusivo mentorados
                 </span>
               )}
               {isNew(agent.created) && (

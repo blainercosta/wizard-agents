@@ -15,6 +15,8 @@ export function isDefaultCategory(slug: string): boolean {
   return (DEFAULT_CATEGORY_SLUGS as readonly string[]).includes(slug);
 }
 
+export type AgentAudience = 'public' | 'mentees';
+
 export interface CommunityAuthor {
   username: string;
   avatarUrl: string | null;
@@ -37,6 +39,7 @@ export interface CommunityAgent {
   rejectionReason: string | null;
   ownerId: string;
   author: CommunityAuthor;
+  audience: AgentAudience;
 }
 
 // GitHub usernames whose agents are treated as curated (no Community badge,
